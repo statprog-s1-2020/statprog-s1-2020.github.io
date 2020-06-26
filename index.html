@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="generator" content="Hugo 0.68.3" />
+
+  <title>Statistical Programming - Math 11176</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css" integrity="sha384-nn4HPE8lTHyVtfCBi5yW9d20FjT8BJwUXyWZT9InLYax14RDjBj46LmSztkmNP9w" crossorigin="anonymous">
+  
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/v4-shims.css">
+
+  <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="css/menu.css">
+  <link rel="stylesheet" href="css/blackburn.css">
+  <link rel="stylesheet" href="css/schedule.css">
+</head>
+
+
+<body>
+<div id="layout">
+
+  <div class="home-menu pure-menu pure-menu-horizontal pure-menu-fixed">
+  
+  <div>
+      Math 11176
+      &nbsp; - &nbsp;
+      Statistical Programming (2020-2021) [Sem 1] 
+  </div>
+
+  <ul class="pure-menu-list">
+    
+      <li class="pure-menu-item">
+        <a class="pure-menu-link" href="#schedule"><i class='fa fa-home fa-fw'></i> Home</a>
+      </li>
+    
+      <li class="pure-menu-item">
+        <a class="pure-menu-link" href="#syllabus"><i class='fa fa-file-text-o fa-fw'></i> Syllabus</a>
+      </li>
+    
+      <li class="pure-menu-item">
+        <a class="pure-menu-link" href="http://piazza.com/ed.ac.uk/fall2019/math11176"><i class="fas fa-comment fa-fw"></i> Piazza</a>
+      </li>
+    
+      <li class="pure-menu-item">
+        <a class="pure-menu-link" href="https://github.com/statprog-s1-2020"><i class='fa fa-github fa-fw'></i> Github</a>
+      </li>
+    
+      <li class="pure-menu-item">
+        <a class="pure-menu-link" href="https://noteable.edina.ac.uk/login"><i class='fab fa-r-project fa-fw'></i> RStudio</a>
+      </li>
+    
+  </ul>
+</div>
+
+
+  <div id="main">
+    
+    <div class="content" id="content">
+      <div class="wrapper">
+          
+        
+          <section class="schedule", id="schedule">
+          <h2>Schedule</h2>
+
+<div class="schedule-tbl">
+  <table>
+    <colgroup>
+      <col style="width:auto">
+      <col style="width:auto">
+      <col style="width:auto">
+      <col style="width:auto">
+      <col style="width:40%">
+      <col style="width:60%">
+      <col style="width:2.5%">
+    </colgroup> 
+    <thead>
+      <tr>
+        <th>Week</th>
+        <th>Date</th>
+        <th></th>
+        <th>Lecture</th>
+        <th>Readings</th>
+        <th>Notes</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      
+
+      
+      
+      
+        
+        
+        
+
+        <tr class="schedule-other">
+          <td class="schedule-week"> 
+            
+              1
+            
+            
+          </td>
+          <td class="schedule-date"> Mon, Sep 28</td>
+          <td class="schedule-slides">
+            
+            
+              
+              
+              
+              
+              
+                <i class="far fa-file fa-fw inactive"></i>
+              
+
+              
+                <i class="far fa-file-pdf fa-fw inactive"></i>
+              
+
+              
+                <i class="far fa-file-code fa-fw inactive"></i>
+              
+  
+              
+                <i class="fab fa-youtube fa-fw inactive"></i>
+              
+            
+
+          </td>
+          <td class="schedule-title">Introduction <br/> Logic and Types in R <br/> git & Github </td>
+          <td class="schedule-readings">
+            
+              
+                <ul>
+                
+                  <li> 
+                    
+                      <a href="https://style.tidyverse.org/">Tidyverse style guide</a> 
+                    
+                  </li>
+                
+                  <li> 
+                    
+                      <a href="http://adv-r.had.co.nz/Data-structures.html">Adv-R - Data Structures</a> 
+                    
+                  </li>
+                
+                  <li> 
+                    
+                      <a href="http://happygitwithr.com/">Happy Git and GitHub</a> 
+                    
+                  </li>
+                
+                </ul>
+              
+            
+          </td>
+          <td class="schedule-notes">
+            
+          </td>
+          <td> </td>
+        </tr>
+      
+        
+        
+        
+
+        <tr class="schedule-other">
+          <td class="schedule-week"> 
+            
+              2
+            
+            
+          </td>
+          <td class="schedule-date"> Mon, Oct 5</td>
+          <td class="schedule-slides">
+            
+            
+              
+              
+              
+              
+              
+                <i class="far fa-file fa-fw inactive"></i>
+              
+
+              
+                <i class="far fa-file-pdf fa-fw inactive"></i>
+              
+
+              
+                <i class="far fa-file-code fa-fw inactive"></i>
+              
+  
+              
+                <i class="fab fa-youtube fa-fw inactive"></i>
+              
+            
+
+          </td>
+          <td class="schedule-title">Data Structures & S3 <br/> Subsetting </td>
+          <td class="schedule-readings">
+            
+              
+                <ul>
+                
+                  <li> 
+                    
+                      <a href="http://adv-r.had.co.nz/OO-essentials.html#s3">Adv R - OO Field Guide - S3</a> 
+                    
+                  </li>
+                
+                  <li> 
+                    
+                      <a href="http://adv-r.had.co.nz/Subsetting.html">Adv-R - Subsetting</a> 
+                    
+                  </li>
+                
+                </ul>
+              
+            
+          </td>
+          <td class="schedule-notes">
+            
+          </td>
+          <td> </td>
+        </tr>
+      
+        
+        
+        
+
+        <tr class="schedule-other">
+          <td class="schedule-week"> 
+            
+              3
+            
+            
+          </td>
+          <td class="schedule-date"> Mon, Oct 12</td>
+          <td class="schedule-slides">
+            
+            
+              
+              
+              
+              
+              
+                <i class="far fa-file fa-fw inactive"></i>
+              
+
+              
+                <i class="far fa-file-pdf fa-fw inactive"></i>
+              
+
+              
+                <i class="far fa-file-code fa-fw inactive"></i>
+              
+  
+              
+                <i class="fab fa-youtube fa-fw inactive"></i>
+              
+            
+
+          </td>
+          <td class="schedule-title">Tidy data, dplyr </td>
+          <td class="schedule-readings">
+            
+              
+                <ul>
+                
+                  <li> 
+                    
+                      <a href="https://dplyr.tidyverse.org/articles/dplyr.html">dplyr Vignette</a> 
+                    
+                  </li>
+                
+                  <li> 
+                    
+                      <a href="http://r4ds.had.co.nz/tidy-data.html">R4DS - tidy data</a> 
+                    
+                  </li>
+                
+                  <li> 
+                    
+                      <a href="https://github.com/rstudio/cheatsheets/raw/master/data-transformation.pdf">Data transformation cheatsheet</a> 
+                    
+                  </li>
+                
+                  <li> 
+                    
+                      <a href="https://github.com/rstudio/cheatsheets/blob/master/data-import.pdf">data import cheatsheet</a> 
+                    
+                  </li>
+                
+                </ul>
+              
+            
+          </td>
+          <td class="schedule-notes">
+            
+          </td>
+          <td> </td>
+        </tr>
+      
+        
+        
+        
+
+        <tr class="schedule-other">
+          <td class="schedule-week"> 
+            
+              4
+            
+            
+          </td>
+          <td class="schedule-date"> Mon, Oct 19</td>
+          <td class="schedule-slides">
+            
+            
+              
+              
+              
+              
+              
+                <i class="far fa-file fa-fw inactive"></i>
+              
+
+              
+                <i class="far fa-file-pdf fa-fw inactive"></i>
+              
+
+              
+                <i class="far fa-file-code fa-fw inactive"></i>
+              
+  
+              
+                <i class="fab fa-youtube fa-fw inactive"></i>
+              
+            
+
+          </td>
+          <td class="schedule-title">purrr & tidyr </td>
+          <td class="schedule-readings">
+            
+              
+                <ul>
+                
+                  <li> 
+                    
+                      <a href="https://jennybc.github.io/purrr-tutorial/index.html">Purrr tutorial</a> 
+                    
+                  </li>
+                
+                  <li> 
+                    
+                      <a href="http://r4ds.had.co.nz/iteration.html">R4DS - Iteration</a> 
+                    
+                  </li>
+                
+                  <li> 
+                    
+                      <a href="https://github.com/rstudio/cheatsheets/raw/master/purrr.pdf">purrr cheatsheet</a> 
+                    
+                  </li>
+                
+                </ul>
+              
+            
+          </td>
+          <td class="schedule-notes">
+            
+          </td>
+          <td> </td>
+        </tr>
+      
+        
+        
+        
+
+        <tr class="schedule-other">
+          <td class="schedule-week"> 
+            
+              5
+            
+            
+          </td>
+          <td class="schedule-date"> Mon, Oct 26</td>
+          <td class="schedule-slides">
+            
+            
+              
+              
+              
+              
+              
+                <i class="far fa-file fa-fw inactive"></i>
+              
+
+              
+                <i class="far fa-file-pdf fa-fw inactive"></i>
+              
+
+              
+                <i class="far fa-file-code fa-fw inactive"></i>
+              
+  
+              
+                <i class="fab fa-youtube fa-fw inactive"></i>
+              
+            
+
+          </td>
+          <td class="schedule-title">Visualization & ggplot2 </td>
+          <td class="schedule-readings">
+            
+              
+                <ul>
+                
+                  <li> 
+                    
+                      <a href="http://r4ds.had.co.nz/data-visualisation.html">R4DS - Visualization</a> 
+                    
+                  </li>
+                
+                  <li> 
+                    
+                      <a href="http://ggplot2.tidyverse.org/reference/index.html">ggplot2 Reference</a> 
+                    
+                  </li>
+                
+                </ul>
+              
+            
+          </td>
+          <td class="schedule-notes">
+            
+          </td>
+          <td> </td>
+        </tr>
+      
+        
+        
+        
+
+        <tr class="schedule-other">
+          <td class="schedule-week"> 
+            
+              6
+            
+            
+          </td>
+          <td class="schedule-date"> Mon, Nov 2</td>
+          <td class="schedule-slides">
+            
+            
+              
+              
+              
+              
+              
+                <i class="far fa-file fa-fw inactive"></i>
+              
+
+              
+                <i class="far fa-file-pdf fa-fw inactive"></i>
+              
+
+              
+                <i class="far fa-file-code fa-fw inactive"></i>
+              
+  
+              
+                <i class="fab fa-youtube fa-fw inactive"></i>
+              
+            
+
+          </td>
+          <td class="schedule-title">Web Scraping </td>
+          <td class="schedule-readings">
+            
+          </td>
+          <td class="schedule-notes">
+            
+          </td>
+          <td> </td>
+        </tr>
+      
+        
+        
+        
+
+        <tr class="schedule-other">
+          <td class="schedule-week"> 
+            
+              7
+            
+            
+          </td>
+          <td class="schedule-date"> Mon, Nov 9</td>
+          <td class="schedule-slides">
+            
+            
+              
+              
+              
+              
+              
+                <i class="far fa-file fa-fw inactive"></i>
+              
+
+              
+                <i class="far fa-file-pdf fa-fw inactive"></i>
+              
+
+              
+                <i class="far fa-file-code fa-fw inactive"></i>
+              
+  
+              
+                <i class="fab fa-youtube fa-fw inactive"></i>
+              
+            
+
+          </td>
+          <td class="schedule-title">Simulation & Bootstrapping </td>
+          <td class="schedule-readings">
+            
+          </td>
+          <td class="schedule-notes">
+            
+          </td>
+          <td> </td>
+        </tr>
+      
+        
+        
+        
+
+        <tr class="schedule-other">
+          <td class="schedule-week"> 
+            
+              8
+            
+            
+          </td>
+          <td class="schedule-date"> Mon, Nov 16</td>
+          <td class="schedule-slides">
+            
+            
+              
+              
+              
+              
+              
+                <i class="far fa-file fa-fw inactive"></i>
+              
+
+              
+                <i class="far fa-file-pdf fa-fw inactive"></i>
+              
+
+              
+                <i class="far fa-file-code fa-fw inactive"></i>
+              
+  
+              
+                <i class="fab fa-youtube fa-fw inactive"></i>
+              
+            
+
+          </td>
+          <td class="schedule-title">Shiny </td>
+          <td class="schedule-readings">
+            
+          </td>
+          <td class="schedule-notes">
+            
+          </td>
+          <td> </td>
+        </tr>
+      
+        
+        
+        
+
+        <tr class="schedule-other">
+          <td class="schedule-week"> 
+            
+              9
+            
+            
+          </td>
+          <td class="schedule-date"> Mon, Nov 23</td>
+          <td class="schedule-slides">
+            
+            
+              
+              
+              
+              
+              
+                <i class="far fa-file fa-fw inactive"></i>
+              
+
+              
+                <i class="far fa-file-pdf fa-fw inactive"></i>
+              
+
+              
+                <i class="far fa-file-code fa-fw inactive"></i>
+              
+  
+              
+                <i class="fab fa-youtube fa-fw inactive"></i>
+              
+            
+
+          </td>
+          <td class="schedule-title">Markov Chain Monte Carlo </td>
+          <td class="schedule-readings">
+            
+          </td>
+          <td class="schedule-notes">
+            
+          </td>
+          <td> </td>
+        </tr>
+      
+        
+        
+        
+
+        <tr class="schedule-other">
+          <td class="schedule-week"> 
+            
+              10
+            
+            
+          </td>
+          <td class="schedule-date"> Mon, Nov 30</td>
+          <td class="schedule-slides">
+            
+            
+              
+              
+              
+              
+              
+                <i class="far fa-file fa-fw inactive"></i>
+              
+
+              
+                <i class="far fa-file-pdf fa-fw inactive"></i>
+              
+
+              
+                <i class="far fa-file-code fa-fw inactive"></i>
+              
+  
+              
+                <i class="fab fa-youtube fa-fw inactive"></i>
+              
+            
+
+          </td>
+          <td class="schedule-title">Probabilistic Programming </td>
+          <td class="schedule-readings">
+            
+          </td>
+          <td class="schedule-notes">
+            
+          </td>
+          <td> </td>
+        </tr>
+      
+        
+        
+        
+
+        <tr class="schedule-other">
+          <td class="schedule-week"> 
+            
+              11
+            
+            
+          </td>
+          <td class="schedule-date"> Mon, Dec 7</td>
+          <td class="schedule-slides">
+            
+            
+              
+              
+              
+              
+              
+                <i class="far fa-file fa-fw inactive"></i>
+              
+
+              
+                <i class="far fa-file-pdf fa-fw inactive"></i>
+              
+
+              
+                <i class="far fa-file-code fa-fw inactive"></i>
+              
+  
+              
+                <i class="fab fa-youtube fa-fw inactive"></i>
+              
+            
+
+          </td>
+          <td class="schedule-title">Catch up </td>
+          <td class="schedule-readings">
+            
+          </td>
+          <td class="schedule-notes">
+            
+          </td>
+          <td> </td>
+        </tr>
+      
+    </tbody>
+  </table>
+</div>
+
+          </section>
+        
+          <section class="syllabus", id="syllabus">
+          <h2>Syllabus</h2>
+
+<h4>Instructors:</h4>
+
+
+<p>
+    Dr. Colin Rundel - <a href="colin.rundel@ed.ac.uk">colin.rundel@ed.ac.uk</a> 
+</p>
+
+<p>
+    Dr. Simon Wood - <a href="simon.wood@ed.ac.uk">simon.wood@ed.ac.uk</a> 
+</p>
+
+
+<h4>Lectures:</h4>
+
+<p>The goal the lectures is for them to be as interactive as possible. Our roles as instructors is to introduce you new tools and techniques, but it is up to you to take them and make use of them. Programming is a skill that is best learned by doing, so as much as possible you will be working on a variety of tasks and activities throughout each lecture. Attendance will not be be used to determine yout mark but you are expected to attend all lectures and meaningfully contribute to in-class exercises and homework assignments.</p>
+
+<h4>Classroom:</h4> 
+
+<p>Lecture</p> 
+<ul>
+  <li> TBD </li>
+</ul>
+
+<p>Workshop</p> 
+<ul>
+  <li> TBD </li>
+</ul>
+
+
+<h4>Teams:</h4>
+
+<p> For all of the team based assignments in this class you will be randomly assigned to teams of 3 or 4 students - these teams will change after each assignment. You will work in these teams during class and on the homework assignment. For team based assignments, all team members are expected to contribute equally to the completion of each assignment and you will be asked to evaluate your team members after each assignment is due. Failure to adequately contribute to an assignment will result in a penalty to your mark relative to the team's overall mark.</p>
+
+
+<h4>Homework and Projects:</h4>
+
+<p>Beyond the in class activities, you will be assigned larger programming tasks throughout the semester (roughly every other week). These assignments will be completed either in a team or individually. </p>
+
+<p>Students are expected to make use of the provided git repository on the course's github page as their central collaborative platform. Commits to this repository will be used as a metric (one of several) of each team member's relative contribution for each homework.</p>
+
+<p> There will be a two projects that you are expected to complete individually. Each project will ask you to complete a number of small programming tasks related to the material presented in the class. The exact structure and content of the projects will be discussed in more detail before they are assigned. You must complete *both* projects in order to pass this class. </p>
+
+
+<h4>Course Announcements:</h4>
+
+<p> I will regularly send course announcements via email and learn, make sure to check one or the other of these daily. We will be using Piazza to facilitate course communication, particularly around questions and answers. If you have a question outside of class or office hours, first check if it has already been asked on Piazza and if not post there. If you have a question or concern you don't feel confortable posting of Piazza feel free to reach out via email.</p>
+
+
+<h4>Late work policy:</h4>
+
+<p> Review the University and School policy for late work <a href='https://teaching.maths.ed.ac.uk/main/undergraduate/your-studies/assessment/extensions'>here</a>. </p>
+
+<p> For all 6 Homework assignments in this course late work will not be accepted, only the work you have committed and pushed to GitHub by the deadline will be marked for those assignments. The two individual projects will follow the standard University late work penalty of 5% of the maximum obtainable mark per calendar day up to seven calendar days after the deadline. If you intend to submit work late for one of these assignments you must notify the course organizer before the original deadline as well as as soon as the completed work is submitted on GitHub. </p>
+
+
+<h4>Assessment:</h4>
+
+<p>Your final mark will be comprised of the following. </p>
+
+<p>
+<table style="width: 500px; height: 250px; margin-left: 1em">
+<thead>
+    <tr class="header">
+        <th>Assignment</th>
+        <th>Type</th>
+        <th>Value</th>
+        <th>Assigned</th>
+    </tr>
+</thead>
+<tbody>
+
+    <tr>
+        <td>Homework 0</td>
+        <td>Individual</td>
+        <td>Not marked</td>
+        <td>Week 1</td>
+    </tr>
+
+    <tr>
+        <td>Homework 1</td>
+        <td>Team</td>
+        <td>TBD</td>
+        <td>Week 2</td>
+    </tr>
+
+    <tr>
+        <td>Homework 2</td>
+        <td>Team</td>
+        <td>TBD</td>
+        <td>Week 4</td>
+    </tr>
+
+    <tr>
+        <td>Project 1</td>
+        <td>Individual</td>
+        <td>TBD</td>
+        <td>Week 5</td>
+    </tr>
+
+    <tr>
+        <td>Homework 3</td>
+        <td>Team</td>
+        <td>TBD</td>
+        <td>Week 7</td>
+    </tr>
+
+    <tr>
+        <td>Homework 4</td>
+        <td>Team</td>
+        <td>TBD</td>
+        <td>Week 9</td>
+    </tr>
+
+    <tr>
+        <td>Project 2</td>
+        <td>Individual</td>
+        <td>TBD</td>
+        <td>Week 10</td>
+    </tr>
+
+</tbody>
+</table>
+</p>
+
+
+          </section>
+        
+          <section class="textbooks", id="textbooks">
+          <h2>Textbooks</h2>
+
+<p>There are no required textbooks for this course, the following textbooks are recommended for supplementary and reference purposes.</p>
+
+<ul>
+  <li>
+    <a href="https://adv-r.hadley.nz/">Advanced R (2nd ed.)</a> - Wickham - Chapman and Hall/CRC, 2019 (978-0815384571)
+  </li>
+  <li>
+    <a href="http://r4ds.had.co.nz/">R for Data Science</a> - Grolemund, Wickham - O'Reilly, 2016 (978-1491910399)
+  </li>
+</ul>
+
+          </section>
+        
+          <section class="contact", id="contact">
+          <h2>Contact Information</h2>
+
+<h4>Office Hours:</h4>
+
+<ul>
+  
+  <li>
+    <a href="colin.rundel@ed.ac.uk">Dr. Colin Rundel</a> - 2256 JCMB - TBD
+  </li>
+  
+  <li>
+    <a href="simon.wood@ed.ac.uk">Dr. Simon Wood</a> -  - TBD
+  </li>
+  
+</ul>
+
+          </section>
+        
+          <section class="about", id="about">
+          <h2>About this website</h2>
+
+<p>This site is built with <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/rstudio/blogdown">Blogdown</a>.
+
+The theme is based on <a href="https://github.com/yoshiharuyamashita/blackburn" target="_blank">Blackburn</a>
+and <a href="https://github.com/jweslley/hugo-conference/">Hugo Conference</a>.</p>
+
+          </section>
+        
+    
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div style="text-align: center">
+  <small>
+    &copy; 2020. All rights reserved.
+  </small>
+</div>
+
+<br/>
+
+</body>
+</html>
