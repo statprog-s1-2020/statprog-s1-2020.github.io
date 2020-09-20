@@ -1,0 +1,258 @@
+---
+title: "Lec 01 - Welcome"
+subtitle: "<br/> Statistical Programming"
+author: "Sem 1, 2020"
+date: "<br/> Dr. Colin Rundel"
+output:
+  xaringan::moon_reader:
+    css: ["xaringan-themer.css", "slides.css"]
+    lib_dir: libs
+    nature:
+      highlightStyle: solarized-light
+      highlightLines: true
+      countIncrementalSlides: false
+      ratio: "16:9"
+
+---
+exclude: true
+
+```{r setup, message=FALSE, warning=FALSE, include=FALSE}
+options(
+  htmltools.dir.version = FALSE, # for blogdown
+  width=80
+)
+
+```
+
+---
+class: middle, center
+
+# Course Details
+
+---
+
+## Course Team
+
+### Instrutors
+* Dr. Colin Rundel (CO) - colin.rundel@ed.ac.uk 
+* Dr. Simon Wood - simon.wood@ed.ac.uk
+
+### Tutors
+* Dr. David Elliot
+* Jinlu Liu  
+* Nestor Sanchez  
+* Dr. Simon Taylor
+
+
+---
+
+## Course website(s)
+
+* Learn - https://learn.ed.ac.uk
+  - PDFs of Slides
+  - Lecture videos (media hopper)
+  - Links to course tools
+
+* GitHub pages - https://statprog-s1-2020.github.io
+  - HTML, PDF, and Rmds of Slides
+  - Lecture video links (youtube)
+  - Readings
+  - Links to course tools
+
+
+---
+
+## Course Timetable
+
+* Synchronous lectures (some weeks) - Mondays, 1 - 2 pm BST
+
+* Workshops (every week)
+  - Tutorial Group 01 - Tuesdays, 10:30 to 11:30 am BST
+  - Tutorial Group 02 - Tuesdays, 12:10 to 13:00 pm BST
+  - Tutorial Group 03 - Tuesdays, 14:10 to 15:00 pm BST
+  - Tutorial Group 04 - Tuesdays, 15:30 to 16:30 pm BST
+
+---
+
+## Lectures
+
+- All lectures will be online this semester - posted to Learn and Youtube
+
+- 1-2 hours of content per week
+
+- Traditional lecture, live coding / coding demos, and short exercises + solutions
+
+---
+
+## Workshops
+
+- All workshops will be online this semester using Zoom (not recorded)
+
+- Attendance is expected and you must attend the tutorial group you are enrolled in (see your personal timetable)
+
+- Opportunity to work on course assignments with Tutor and Instructor support
+
+---
+
+## Announcements
+
+Will be posted on Learn (Announcements tool) and sent via email, be sure to check both regularly.
+
+```{r echo=FALSE, fig.align="left", out.width="80%"}
+knitr::include_graphics("imgs/learn_announcements.png")
+```
+
+---
+
+## Marking
+
+This course is assessed 100% on your coursework (there is no exam). We will be assessing you based on the following assignments,
+
+|Assignment|Type      |Value  |Assigned   | Due            |
+|:---------|:---------|:------|-----------|----------------|
+|Homework 1|Team      |12.5%  | Week 2    | End of Week 3  |
+|Homework 2|Team      |12.5%  | Week 4    | End of Week 5  |
+|Project 1 |Individual|25%    | Week 5    | End of Week 6  |
+|Homework 3|Team      |12.5%  | Week 7    | End of Week 8  |
+|Homework 4|Team      |12.5%  | Week 9    | End of Week 10 |
+|Project 2 |Individual|25%    | Week 10   | Week 12        |
+
+---
+
+## Teams
+
+* Team homework assignments
+  + Roughly biweekly assignments
+  + Open ended
+  + 5 - 20 hours of work
+  + Peer evaluation after completion
+
+<br/>
+
+* Expectations and roles
+    + Everyone is expected to contribute equal *effort*
+    + Everyone is expected to understand *all* code turned in
+    + Individual contribution evaluated by peer evaluation, commits, etc.
+
+---
+
+## Collaboration policy
+
+- Only work that is clearly assigned as team work should be completed collaboratively (Homeworks). 
+
+- Individual assignments (Projects) must be completed individually, you may not directly share or discuss answers / code with anyone other than the Instructors and Tutors
+
+- On Homeworks you may not directly share answers / code with other teams in this class, however you are welcome to discuss the problems in general and ask for advice
+
+
+---
+
+## Sharing / reusing code policy
+
+- We are aware that a huge volume of code is available on the web, and many tasks may have solutions posted.
+
+- Unless explicitly stated otherwise, this course's policy is that you may make use of any online resources (e.g. Google, StackOverflow, etc.) but you must explicitly cite where you obtained any code you directly use or use as inspiration in your solution(s). 
+
+- Any recycled code that is discovered and is not explicitly cited will be treated as plagiarism, regardless of source.
+
+---
+class: center, middle
+
+# Course Tools
+
+---
+
+## Zoom
+
+- Online video conferencing platform
+
+- Required for workshops, we strongly recommend using the app (vs the web interface)
+
+- Please use your University of Edinburgh provided account </br> (Sign in using the SSO option with `ed-ac-uk`)
+
+
+```{r echo=FALSE,  out.width="40%"}
+knitr::include_graphics("imgs/zoom_signin.png")
+```
+```{r echo=FALSE,  out.width="40%"}
+knitr::include_graphics("imgs/zoom_signin2.png")
+```
+
+
+---
+
+## Zoom expectations
+
+When participating in a Zoom session in the course we have the following basic expectations:
+
+- When in a large session you should,
+  - have your microphone muted by default.
+  - use the raise your hand feature if you have a question
+
+- In the small team sessions you should,
+  - have your camera turned on as much as possible
+  - engage with your teammates via voice and text chat
+  - take turns sharing your screen when necessary
+
+---
+
+## Piazza
+
+- Online forum for asking and answering questions
+
+- Integration via Learn will be available shortly - more information to follow
+
+- All course logistic, assignment, etc. type questions should be posted here
+
+- Personal question (e.g. extensions, special circumstances, etc.) should be via email to the Course Organizer
+
+---
+
+## RStudio Cloud .float-right[ .small[https://rstudio.cloud] ]
+
+- Browser based, cloud RStudio instances
+
+- Provides consistency in hardware and software environments
+
+- Tutors and Instructors are able to drop into your session to provide support
+
+- Local R installations are fine but we will not guarantee support 
+
+---
+
+## GitHub .float-right[ .small[https://github.com] ] 
+
+- We will be using an organization specifically to this course <br/> https://github.com/statprog-s1-2020
+
+- All assignments will be distributed and collected via GitHub
+
+- All of your work and your membership (enrollment) in the organization is private
+
+---
+
+## Username advice
+
+Some brief advice about selecting your account names (particularly for GitHub),
+
+- Incorporate your actual name! People like to know who they’re dealing with. Also makes your username easier for people to guess or remember.
+
+- Reuse your username from other contexts, e.g., Twitter or Slack.
+
+- Pick a username you will be comfortable revealing to your future boss.
+
+- Shorter is better than longer, but be as unique as possible.
+
+- Make it timeless. Avoid highlighting your current university, employer, or place of residence.
+
+---
+
+## Feedback
+
+The content of this course has not changed, but we are trying a number of new tools and approaches for the delivery. 
+
+- Technical failures are inevitable - we will work to resolve them as quickly as possible, but we also need to know when they happen.
+  - Report issues with any of the tools on Piazza and/or via email 
+  
+- Patience and empathy go a long way (for staff as well as your fellow students)
+
+- Constructive feedback is welcome - let us know if there are issues so that we can correct early
