@@ -5,10 +5,6 @@
     <link>/categories/</link>
     <description>Recent content in Categories on Statistical Programming</description>
     <generator>Hugo -- gohugo.io</generator>
-    <copyright>&amp;copy; 2020. All rights reserved.</copyright>
-    
-	<atom:link href="/categories/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <copyright>&amp;copy; 2020. All rights reserved.</copyright><atom:link href="/categories/index.xml" rel="self" type="application/rss+xml" />
   </channel>
 </rss>
