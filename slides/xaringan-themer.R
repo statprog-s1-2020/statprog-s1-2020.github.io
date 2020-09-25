@@ -19,10 +19,10 @@ style_solarized_dark(
   table_border_color = "#8A8A8A",              # gray
   table_row_border_color = "#8A8A8A",          # gray
   table_row_even_background_color = "#353535", # slightly lighter dark-blue
-  base_font_size = "30px",
-  header_h1_font_size = "2rem",
-  header_h2_font_size = "1.75rem",
-  header_h3_font_size = "1.5rem",
+  base_font_size = "26px",
+  header_h1_font_size = "1.75rem",
+  header_h2_font_size = "1.5rem",
+  header_h3_font_size = "1.25rem",
   text_font_google = google_font("Source Sans Pro"),
   text_font_family = xaringanthemer_font_default("text_font_family"),
   text_font_weight = xaringanthemer_font_default("text_font_weight"),
@@ -31,7 +31,7 @@ style_solarized_dark(
   text_font_base = "sans-serif",
   code_font_google = google_font("Source Sans Code"),
   code_font_family = xaringanthemer_font_default("code_font_family"),
-  code_font_size = "0.9rem",
+  code_font_size = "0.7rem",
   code_font_url = xaringanthemer_font_default("code_font_url"),
   code_font_family_fallback = xaringanthemer_font_default("code_font_family_fallback"),
   outfile = "xaringan-themer.css"

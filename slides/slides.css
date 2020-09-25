@@ -22,6 +22,11 @@
   --pink-faint: #E9AFA350;
 }
 
+.remark-slide-content pre {
+  margin-bottom: 0;
+  margin-top: 0.5em;
+}
+
 .float-right { 
   float: right;
 }
@@ -144,9 +149,41 @@ h1, h2, h3 {
   clear: both;
 }
 
+.pad-top {
+  padding-top: 1em;
+}
+
+
+.col3_left {
+  float: left;
+  width: 32%;
+}
+
+.col3_mid {
+  float: left;
+  width: 32%;
+  padding-left: 2%;
+}
+
+.col3_right {
+  float: right;
+  width: 32%;
+}
+
+.col3_right ~ * {
+  clear: both;
+}
+
+
+
+
+
+
 /* Footnote */
 .footnote {
-  padding-left: 30px;
+  padding-left: 0px;
+  padding-right: 25%;
+  bottom: 0;
 }
 
 
@@ -154,6 +191,7 @@ h1, h2, h3 {
 
 ul{
   list-style-type: square;
+  padding-inline-start: 40px;
 }
 
 /* Footer */
