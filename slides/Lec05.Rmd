@@ -1,0 +1,1043 @@
+---
+title: "Lec 05 - Generic vectors, data frames, and subsetting"
+subtitle: "<br/> Statistical Programming"
+author: "Sem 1, 2020"
+date: "<br/> Dr. Colin Rundel"
+output:
+  xaringan::moon_reader:
+    css: ["xaringan-themer.css", "slides.css"]
+    lib_dir: libs
+    nature:
+      highlightStyle: solarized-light
+      highlightLines: true
+      countIncrementalSlides: false
+      ratio: "16:9"
+
+---
+exclude: true
+
+```{r setup, message=FALSE, warning=FALSE, include=FALSE}
+options(
+  htmltools.dir.version = FALSE, # for blogdown
+  width=80
+)
+```
+
+---
+class: middle
+count: false
+
+# Generic Vectors (Briefly)
+
+---
+
+## Lists
+
+Lists are _generic vectors_, as such they are 1 dimensional (i.e. have a length) and can contain any type of R object.
+
+```{r}
+list("A", c(TRUE,FALSE), (1:4)/2, list(1:2), function(x) x^2)
+```
+
+
+---
+
+## structure
+
+Often we want a more compact representation of a complex object, the `str` function is useful for this particular task
+
+```{r}
+str(1:4)
+```
+
+```{r}
+str( list("A", c(TRUE,FALSE), (1:4)/2, list(1:2), function(x) x^2) )
+```
+
+
+---
+
+## Lists as "trees"
+
+Lists can contain other lists, meaning they can have a hierarchical (tree-like) structure
+
+```{r}
+str( list(a=1, b=list(c=2, d=list(f=3, g=4), e=5)) )
+```
+
+```{r out.width="40%", echo=FALSE, fig.align="center"}
+knitr::include_graphics("imgs/list_tree.png")
+```
+
+---
+
+## Heirarchical Data
+
+.pull-left[
+```{r}
+json = '{
+  "firstName": "John",
+  "lastName": "Smith",
+  "isAlive": true,
+  "age": 27,
+  "phoneNumbers": [
+    {
+      "type": "home",
+      "number": "212 555-1234"
+    },{
+      "type": "mobile",
+      "number": "123 456-7890"
+    }
+  ]
+}'
+```
+]
+
+.pull-right[
+```{r}
+str( jsonlite::fromJSON(json, simplifyVector = FALSE) )
+```
+]
+
+
+---
+
+## List Coercion - concatenation
+
+By default a vector will be coerced to a list (as a list is more generic) if needed
+
+```{r}
+str( c(1, list(4, list(6, 7))) )
+```
+
+--
+
+We can coerce a list into an atomic vector using `unlist` - the usual type coercion rules then apply to determine the atomic vector's type.
+
+```{r}
+unlist(list(1:3, list(4:5, 6)))
+unlist( list(1, list(2, list(3, "Hello"))) )
+```
+
+
+---
+class: middle
+count: false
+
+# Data Frames
+
+---
+
+## Data Frames
+
+A data frame is how R handles heterogeneous tabular data (i.e. rows and columns) and is one of the most commonly used data structure in R.
+
+```{r}
+(df = data.frame(
+  x = 1:3, 
+  y = c("a", "b", "c"),
+  z = c(TRUE)
+))
+```
+
+--
+
+R represents data frames using a *list* of equal length *vectors*.
+
+```{r}
+str(df)
+```
+
+---
+
+```{r}
+typeof(df)
+class(df)
+attributes(df)
+```
+
+--
+
+```{r}
+str(unclass(df))
+```
+
+---
+
+## Roll your own data.frame
+
+```{r}
+df2 = list(x = 1:3, y = c("a", "b", "c"), z = c(TRUE, TRUE, TRUE))
+```
+
+--
+
+.pull-left[
+```{r}
+attr(df2,"class") = "data.frame"
+df2
+```
+]
+
+--
+
+.pull-right[
+```{r}
+attr(df2,"row.names") = 1:3
+df2
+```
+]
+
+<div/>
+
+--
+
+.pad-top[
+```{r}
+str(df2)
+identical(df, df2)
+```
+]
+
+---
+
+## Strings (Characters) vs Factors
+
+Previous to R v4.0.0, the default behavior of data frames was to convert character data into factors. Sometimes this was useful, but mostly it wasn't.
+
+Either way it is important to know what type/class you are working with. This behavior can be changed using the `stringsAsFactors` argument to `data.frame` and related functions (e.g. `read.csv`, `read.table`, etc.).
+
+```{r}
+df = data.frame(x = 1:3, y = c("a", "b", "c"), stringsAsFactors = TRUE)
+df
+str(df)
+```
+
+---
+
+## Length Coercion
+
+For data frames on creation the lengths of the component vectors will be coerced to match, however if they not multiples then there will be an error (previously this produced a warning).
+
+```{r error=TRUE}
+data.frame(x = 1:3, y = c("a"))
+```
+
+--
+
+```{r error=TRUE}
+data.frame(x = 1:3, y = c("a","b"))
+```
+
+--
+
+```{r error=TRUE}
+data.frame(x = 1:3, y = character())
+```
+
+
+
+
+---
+class: middle, center
+
+# Subsetting
+
+---
+
+## Subsetting in General
+
+R has three subsetting operators (`[`, `[[`, and `$`). The behavior of these operators will depend on the object (class) they are being used with.
+
+In general there are 6 different types of subseting that can be performed:
+
+.pull-left[
+* Positive integer
+
+* Negative integer
+
+* Logical value
+]
+
+.pull-right[
+* Empty / NULL
+
+* Zero
+
+* Character value (names)
+]
+
+---
+
+## Positive Integer subsetting
+
+Returns elements at the given location(s) (Note - R uses a 1-based indexing scheme).
+
+```{r}
+x = c(1,4,7)
+y = list(1,4,7)
+```
+
+.pull-left[.small[
+```{r}
+x[c(1,3)]
+x[c(1,1)]
+x[c(1.9,2.1)]
+```
+] ]
+
+.pull-right[ .small[
+```{r}
+str( y[c(1,3)] )
+str( y[c(1,1)] )
+str( y[c(1.9,2.1)] )
+```
+] ]
+
+---
+
+## Negative Integer subsetting
+
+Excludes elements at the given location(s)
+
+.pull-left[
+```{r, error=TRUE}
+x = c(1,4,7)
+x[-1]
+x[-c(1,3)]
+x[c(-1,-1)]
+```
+]
+
+.pull-right[
+```{r, error=TRUE}
+y = list(1,4,7)
+str( y[-1] )
+str( y[-c(1,3)] )
+```
+]
+
+<br/>
+
+
+```{r error=TRUE}
+x[c(-1,2)]
+y[c(-1,2)]
+```
+
+---
+
+## Logical Value Subsetting
+
+Returns elements that correspond to `TRUE` in the logical vector. Length of the logical vector is expanded to be the same of the vector being subsetted (length coercion).
+
+.pull-left[
+```{r}
+x = c(1,4,7,12)
+x[c(TRUE,TRUE,FALSE,TRUE)]
+x[c(TRUE,FALSE)]
+x[x %% 2 == 0]
+```
+]
+
+.pull-right[
+```{r, error=TRUE}
+y = list(1,4,7,12)
+str( y[c(TRUE,TRUE,FALSE,TRUE)] )
+str( y[c(TRUE,FALSE)] )
+```
+]
+
+<div/>
+
+.pad-top[
+```{r error=TRUE}
+str( y[y %% 2 == 0] )
+```
+]
+
+---
+
+## Empty Subsetting
+
+Returns the original vector.
+
+```{r}
+x = c(1,4,7)
+x[]
+
+y = list(1,4,7)
+str(y[])
+```
+
+---
+
+## Zero subsetting
+
+Returns an empty vector (of the same type)
+
+.pull-left[
+```{r}
+x = c(1,4,7)
+x[0]
+
+y = list(1,4,7)
+str(y[0])
+```
+]
+
+.pull-right[
+```{r}
+x[c(0,1)]
+
+y[c(0,1)]
+```
+]
+
+<div/>
+
+--
+
+.pull-left[]
+
+.pull-right[
+```{r}
+x[c(0,-1)]
+
+y[c(0,-1)]
+```
+]
+
+
+---
+
+## Character subsetting
+
+If the vector has names, select elements whose names correspond to the values in the character vector.
+
+.pull-left[
+```{r}
+x = c(a=1,b=4,c=7)
+x["a"]
+x[c("a","a")]
+x[c("b","c")]
+```
+]
+
+.pull-right[
+```{r}
+y = list(a=1,b=4,c=7)
+str(y["a"])
+str(y[c("a","a")])
+str(y[c("b","c")])
+```
+]
+
+---
+
+## Out of bounds
+
+.pull-left[
+```{r}
+x = c(1,4,7)
+x[4]
+x[-4]
+x["a"]
+x[c(1,4)]
+```
+]
+
+.pull-right[
+```{r}
+y = list(1,4,7)
+str(y[4])
+str(y[-4])
+str(y["a"])
+str(y[c(1,4)])
+```
+]
+
+---
+
+## Missing and NULL
+
+.pull-left[
+```{r}
+x = c(1,4,7)
+x[NA]
+x[NULL]
+x[c(1,NA)]
+```
+]
+
+.pull-right[
+```{r}
+y = list(1,4,7)
+str(y[NA])
+str(y[NULL])
+str(y[c(1,NA)])
+```
+]
+
+---
+
+## Atomic vectors - [ vs. [[
+
+`[[` subsets like `[` except it can only subset for a *single* value or position. 
+
+```{r, error=TRUE}
+x = c(a=1,b=4,c=7)
+```
+
+--
+
+```{r}
+x[1]
+```
+
+--
+
+```{r, error=TRUE}
+x[[1]]
+x[["a"]]
+x[[1:2]]
+x[[TRUE]]
+```
+
+---
+
+## Generic Vectors - [ vs. [[
+
+Subsets a single value, but returns the value - not a list containing that value.
+
+```{r, error=TRUE}
+y = list(a=1, b=4, c=7)
+```
+
+.pull-left[
+```{r, error=TRUE}
+y[2]
+```
+]
+
+.pull-right[
+```{r, error=TRUE}
+str( y[2] )
+```
+]
+
+<div/>
+
+--
+
+.pad-top[]
+
+```{r, error=TRUE}
+y[[2]]
+y[["b"]]
+y[[1:2]]
+y[[2:1]]
+```
+
+---
+
+## Hadley's Analogy (1)
+
+```{r echo=FALSE, fig.align="center", out.width="45%"}
+knitr::include_graphics("imgs/list_train1.png")
+```
+--
+```{r echo=FALSE, fig.align="center", out.width="45%"}
+knitr::include_graphics("imgs/list_train2.png")
+```
+--
+```{r echo=FALSE, fig.align="center", out.width="45%"}
+knitr::include_graphics("imgs/list_train3.png")
+```
+
+
+.footnote[
+From Advanced R - [Chapter 4.3](https://adv-r.hadley.nz/subsetting.html#subset-single)
+]
+
+---
+
+## Hadley's Analogy (2)
+
+```{r echo=FALSE, fig.align="center", out.width="80%"}
+knitr::include_graphics("imgs/pepper_subset.png")
+```
+
+---
+
+## [[ vs. $
+
+`$` is equivalent to `[[` but it only works for named *lists* and it has a terrible default behavior where it uses partial matching for names.
+
+```{r, error=TRUE}
+x = c("abc"=1, "def"=5)
+x$abc
+y = list("abc"=1, "def"=5)
+y[["abc"]]
+y$abc
+y$d
+```
+
+---
+
+## A common error
+
+Why does the following code not work?
+
+```{r error=TRUE}
+x = list(abc = 1:10, def = 10:1)
+y = "abc"
+
+x$y
+```
+
+--
+
+The expression `x$y` gets directly interpreted as `x[["y"]]` by R, not the include of the `"`s, this is not the same as the expression `x[[y]]`.
+
+```{r}
+x[[y]]
+```
+
+---
+
+## Exercise 1
+
+Below are 100 values,
+
+```{r}
+x = c(56, 3, 17, 2, 4, 9, 6, 5, 19, 5, 2, 3, 5, 0, 13, 12, 6, 31, 10, 21, 8, 4, 1, 1, 2, 5, 16, 1, 3, 8, 1,
+      3, 4, 8, 5, 2, 8, 6, 18, 40, 10, 20, 1, 27, 2, 11, 14, 5, 7, 0, 3, 0, 7, 0, 8, 10, 10, 12, 8, 82,
+      21, 3, 34, 55, 18, 2, 9, 29, 1, 4, 7, 14, 7, 1, 2, 7, 4, 74, 5, 0, 3, 13, 2, 8, 1, 6, 13, 7, 1, 10,
+      5, 2, 4, 4, 14, 15, 4, 17, 1, 9)
+```
+
+write down how you would create a subset to accomplish each of the following:
+
+* Select every third value starting at position 2 in `x`.
+
+* Remove all values with an odd index (e.g. 1, 3, etc.)
+
+* Remove every 4th value, but only if it is odd.
+
+---
+class: middle
+count: false
+
+# Subsetting Data Frames
+
+---
+
+## Basic subsetting
+
+As data frames have 2 dimensions, we can subset on either the rows or the columns - the subsetting values are separated by a comma.
+
+```{r}
+(df = data.frame(x = 1:3, y = c("A","B","C"), z = TRUE))
+```
+
+--
+
+.pull-left[
+```{r}
+df[1, ]
+```
+]
+
+.pull-right[
+```{r}
+str( df[1, ] )
+```
+]
+
+<div/>
+
+--
+
+.pull-left[
+```{r}
+df[c(1,3), ]
+```
+]
+
+.pull-right[
+```{r}
+str( df[c(1,3), ] )
+```
+]
+
+<div/>
+
+
+--
+
+.pull-left[
+```{r}
+df[, 1]
+```
+]
+
+.pull-right[
+```{r}
+str( df[, 1] )
+```
+]
+
+---
+
+## Subsetting Rows
+
+```{r}
+df
+```
+
+--
+
+.pull-left[
+```{r}
+df[, 1]
+```
+]
+
+.pull-right[
+```{r}
+str( df[, 1] )
+```
+]
+
+<div/>
+
+--
+
+.pull-left[
+```{r}
+df[, 1:2]
+```
+]
+
+.pull-right[
+```{r}
+str( df[, 1:2] )
+```
+]
+
+<div/>
+
+--
+
+.pull-left[
+```{r}
+df[, -3]
+```
+]
+
+.pull-right[
+```{r}
+str( df[, -3] )
+```
+]
+
+<div/>
+
+---
+
+## Subsetting both
+
+```{r}
+df
+```
+
+--
+
+.pull-left[
+```{r}
+df[1, 1]
+```
+]
+
+.pull-right[
+```{r}
+str( df[1, 1] )
+```
+]
+
+<div/>
+
+--
+
+.pull-left[
+```{r}
+df[1:2, 1:2]
+```
+]
+
+.pull-right[
+```{r}
+str( df[1:2, 1:2] )
+```
+]
+
+<div/>
+
+--
+
+.pull-left[
+```{r}
+df[-1, 2:3]
+```
+]
+
+.pull-right[
+```{r}
+str( df[-1, 2:3] )
+```
+]
+
+<div/>
+
+---
+
+## Preserving vs Simplifying
+
+Most of the time, R's `[` subset operator is a *preserving* operator, in that the returned object will always have the same type/class as the object being subset. Confusingly, when used with some classes (e.g. data frame, matrix or array) `[` becomes a *simplifying* operator (does not preserve type) - this behavior is instead controlled by the `drop` argument.
+
+--
+
+.pull-left[
+```{r error=TRUE}
+df[1, ]
+```
+]
+
+.pull-right[
+```{r error=TRUE}
+str(df[1, ])
+```
+]
+
+<div/>
+
+--
+
+.pull-left[
+```{r error=TRUE}
+df[1, , drop=TRUE]
+```
+]
+
+.pull-right[
+```{r error=TRUE}
+str(df[1, , drop=TRUE])
+```
+]
+
+<div/>
+
+---
+
+.pull-left[
+```{r error=TRUE}
+df[, 1]
+```
+]
+
+.pull-right[
+```{r error=TRUE}
+str(df[, 1])
+```
+]
+
+<div/>
+
+--
+
+.pull-left[
+```{r error=TRUE}
+df[, 1, drop=FALSE]
+```
+]
+
+.pull-right[
+```{r error=TRUE}
+str(df[, 1, drop=FALSE])
+```
+]
+
+<div/>
+
+--
+
+.pad-top[]
+
+.pull-left[
+```{r error=TRUE}
+df[1:2, 1:2]
+```
+]
+
+.pull-right[
+```{r error=TRUE}
+str(df[1:2, 1:2])
+```
+]
+
+<div/>
+
+--
+
+.pull-left[
+```{r error=TRUE}
+df[1:2, 1:2, drop=TRUE]
+```
+]
+
+.pull-right[
+```{r error=TRUE}
+str(df[1:2, 1:2, drop=TRUE])
+```
+]
+
+<div/>
+
+--
+
+.pad-top[
+`drop` only works when the resulting value can be represented as a 1d vector (list or atomic).
+]
+
+---
+
+## Preserving vs Simplifying Subsets
+
+<br/>
+
+Type             |  Simplifying             |  Preserving
+:----------------|:-------------------------|:-----------------------------------------------------
+Atomic Vector    |                          |  `x[[1]]` <br/> `x[1]`
+List             |  `x[[1]]`                |  `x[1]`
+Matrix / Array   |  `x[[1]]` <br/> `x[1, ]` <br/> `x[, 1]` |  `x[1, , drop=FALSE]` <br/> `x[, 1, drop=FALSE]`
+Factor           |  `x[1:4, drop=TRUE]`     |  `x[1:4]` <br/> `x[[1]]`
+Data frame       |  `x[, 1]` <br/> `x[[1]]` |  `x[, 1, drop=FALSE]` <br/> `x[1]`
+
+---
+class: middle
+count: false
+
+# Subsetting and assignment
+
+---
+
+## Subsetting and assignment
+
+Subsets can also be used with assignment to update specific values within an object.
+
+```{r}
+x = c(1, 4, 7)
+```
+
+--
+
+```{r}
+x[2] = 2
+x
+```
+--
+```{r}
+x %% 2 != 0
+```
+--
+```{r}
+x[x %% 2 != 0] = x[x %% 2 != 0] + 1
+x
+```
+--
+```{r}
+x[c(1,1)] = c(2,3)
+x
+```
+
+---
+
+```{r}
+x = 1:6
+x[c(2,NA)] = 1
+x
+```
+
+--
+
+```{r}
+x = 1:6
+x[c(-1,-2)] = 3
+x
+```
+
+--
+
+```{r}
+x = 1:6
+x[c(TRUE,NA)] = 1
+x
+```
+
+--
+
+```{r}
+x = 1:6
+x[] = 1:3
+x
+```
+
+
+---
+
+## Subsets of Subsets
+
+```{r}
+df = data.frame(a = c(5,1,NA,3))
+```
+
+```{r}
+df$a[df$a == 5] = 0
+df
+```
+
+--
+
+```{r}
+df[1][df[1] == 3] = 0
+df
+```
+
+---
+
+## Exercise 2
+
+Some data providers choose to encode missing values using values like `-999`. Below is a sample data frame with missing values encoded in this way. 
+
+```{r}
+d = data.frame(
+  patient_id = c(1, 2, 3, 4, 5),
+  age = c(32, 27, 56, 19, 65),
+  bp = c(110, 100, 125, -999, -999),
+  o2 = c(97, 95, -999, -999, 99)
+)
+```
+
+* *Task 1* - using the subsetting tools we've discussed come up with code that will replace the `-999` values in the `bp` and `o2` column with actual `NA` values. Save this as `d_na`.
+
+* *Task 2* - Once you have created `d_na` come up with code that translate it back into the original data frame `d`, i.e. replace the `NA`s with `-999`.
+
+---
+
+## Acknowledgments
+
+Above materials are derived in part from the following sources:
+
+* Hadley Wickham - [Advanced R](http://adv-r.had.co.nz/)
+* [R Language Definition](http://stat.ethz.ch/R-manual/R-devel/doc/manual/R-lang.html)
