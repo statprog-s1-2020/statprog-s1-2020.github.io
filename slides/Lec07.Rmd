@@ -1,0 +1,420 @@
+---
+title: "Lec 07 - tidyr"
+subtitle: "<br/> Statistical Programming"
+author: "Sem 1, 2020"
+date: "<br/> Dr. Colin Rundel"
+output:
+  xaringan::moon_reader:
+    css: ["xaringan-themer.css", "slides.css"]
+    lib_dir: libs
+    nature:
+      highlightStyle: solarized-light
+      highlightLines: true
+      countIncrementalSlides: false
+      ratio: "16:9"
+---
+exclude: true
+
+```{r setup, message=FALSE, warning=FALSE, include=FALSE}
+options(
+  htmltools.dir.version = FALSE, # for blogdown
+  width=80
+)
+
+library(tidyverse)
+```
+
+---
+class: middle
+
+.center[
+```{r echo=FALSE, out.width="45%"}
+knitr::include_graphics('imgs/hex-tidyr.png')
+```
+]
+
+---
+class: middle, center
+
+# Wide vs. Long
+
+---
+
+## Wide -> Long
+
+```{r echo=FALSE, out.width="60%", fig.align="center"}
+knitr::include_graphics('imgs/tidyr_gather.png')
+```
+
+.center[
+`gather` or `pivot_longer`
+]
+
+.footnote[ From [data import cheatsheet](https://github.com/rstudio/cheatsheets/blob/master/data-import.pdf) ]
+
+---
+
+## Long -> Wide ()
+
+```{r echo=FALSE, out.width="70%", fig.align="center"}
+knitr::include_graphics('imgs/tidyr_spread.png')
+```
+
+.center[
+`spread` or `pivot_wider`
+]
+
+.footnote[ From [data import cheatsheet](https://github.com/rstudio/cheatsheets/blob/master/data-import.pdf) ]
+
+---
+
+## Separate
+
+```{r echo=FALSE, out.width="70%", fig.align="center"}
+knitr::include_graphics('imgs/tidyr_separate.png')
+```
+
+.footnote[ From [data import cheatsheet](https://github.com/rstudio/cheatsheets/blob/master/data-import.pdf) ]
+
+---
+
+## Unite
+
+```{r echo=FALSE, out.width="70%", fig.align="center"}
+knitr::include_graphics('imgs/tidyr_unite.png')
+```
+
+.footnote[ From [data import cheatsheet](https://github.com/rstudio/cheatsheets/blob/master/data-import.pdf) ]
+
+---
+
+## Grades
+
+Is the following data tidy?
+
+```{r}
+(grades = tibble::tribble(
+    ~name, ~hw_1, ~hw_2, ~hw_3, ~hw_4, ~proj_1, ~proj_2,
+  "Alice",    19,    19,    18,    20,      89,      95,
+  "Bob",      18,    20,    18,    16,      77,      88,
+  "Carol",    18,    20,    18,    17,      96,      99,
+  "Dave",     19,    19,    18,    19,      86,      82
+))
+```
+
+--
+
+How would we calculate a final score based on the following formula,
+$$\text{score} = 0.5\,\frac{\sum\text{hw}_i}{80} + 0.5\,\frac{\sum\text{proj}_j}{200}$$
+
+---
+
+## Semi-tidy approach
+
+```{r}
+grades %>%
+  mutate(
+    hw_avg = (hw_1+hw_2+hw_3+hw_4)/4,
+    proj_avg = (proj_1+proj_2)/2
+  ) %>%
+  mutate(
+    overall = 0.5*(proj_avg/100) + 0.5*(hw_avg/20)
+  )
+```
+
+---
+
+## pivot_longer (Wide -> Long)
+
+```{r}
+tidyr::pivot_longer(
+  grades, 
+  cols = hw_1:proj_2, 
+  names_to = "assignment", 
+  values_to = "score"
+)
+```
+
+---
+
+```{r}
+tidyr::pivot_longer(
+  grades, 
+  cols = hw_1:proj_2, 
+  names_to = c("type", "id"), 
+  names_sep = "_", 
+  values_to = "score"
+)
+```
+
+
+
+---
+
+## Tidy approach?
+
+```{r}
+grades %>%
+  tidyr::pivot_longer(
+    cols = hw_1:proj_2, 
+    names_to = c("type", "id"),
+    names_sep = "_", 
+    values_to = "score"
+  ) %>% 
+  group_by(name, type) %>%
+  summarize(total = sum(score))
+```
+
+---
+
+## pivot_wider - (Long -> Wide)
+
+```{r}
+grades %>%
+  tidyr::pivot_longer(
+    cols = hw_1:proj_2, 
+    names_to = c("type", "id"), 
+    names_sep = "_", 
+    values_to = "score"
+  ) %>% 
+  group_by(name, type) %>%
+  summarize(total = sum(score)) %>%
+  tidyr::pivot_wider(
+    names_from = type, 
+    values_from = total
+  )
+```
+
+---
+
+## Wrapping up
+
+```{r}
+grades %>%
+  tidyr::pivot_longer(
+    cols = hw_1:proj_2, 
+    names_to = c("type", "id"), 
+    names_sep = "_", 
+    values_to = "score"
+  ) %>% 
+  group_by(name, type) %>%
+  summarize(total = sum(score)) %>%
+  tidyr::pivot_wider(
+    names_from = type, 
+    values_from = total
+  ) %>%
+  mutate(
+    score = 0.5*(hw/80) + 0.5*(proj/200)
+  )
+```
+
+
+---
+class: center, middle
+
+# Rectangling
+
+---
+
+## Star Wars & repurrrsive
+
+`repurrrsive` is a package that contains a number of interesting example data sets that are stored in a hierarchical format. Many come from web-based APIs which provide results as JSON. 
+
+```{r}
+str(repurrrsive::sw_people)
+```
+
+---
+
+## Tidy data from nested lists
+
+Recent versions of `tidyr` have added several functions that are designed to aide in the tidying of hierarchical data. Since they are part of `tidyr` all of the following functions work with data frames.
+
+From `tidyr`
+
+> `hoist()`, `unnest_longer()`, and `unnest_wider()` provide tools for rectangling, collapsing deeply nested lists into regular columns.
+
+---
+
+## Unnesting
+
+```{r}
+(sw_df = tibble::tibble(
+  people = repurrrsive::sw_people
+))
+```
+
+--
+
+```{r}
+unnest_wider(sw_df, people)
+```
+
+---
+
+## List columns
+
+```{r}
+unnest_wider(sw_df, people) %>% 
+  select(name, starships)
+```
+
+--
+
+```{r}
+unnest_wider(sw_df, people) %>% 
+  select(name, starships) %>%
+  pull(starships) %>%
+  str()
+```
+
+---
+
+## Unnest Longer
+
+```{r}
+unnest_wider(sw_df, people) %>% 
+  select(name, starships) %>%
+  unnest_longer(starships)
+```
+
+---
+
+## Aside - sw_starships
+
+```{r}
+(ships = tibble(ships = repurrrsive::sw_starships) %>%
+   unnest_wider(ships) %>%
+   select(ship = name, url)
+)
+```
+
+---
+
+## Joining 
+
+```{r}
+unnest_wider(sw_df, people) %>% 
+  select(name, starships) %>%
+  unnest_longer(starships) %>%
+  left_join(ships, by = c("starships" = "url"))
+```
+
+---
+
+## Joins in general
+
+.pull-left[
+```{r echo=FALSE, out.width="80%", fig.align="center"}
+knitr::include_graphics("imgs/left-join-extra.gif")
+```
+]
+
+--
+
+.pull-right[
+```{r echo=FALSE, out.width="80%", fig.align="center"}
+knitr::include_graphics("imgs/right-join.gif")
+```
+]
+
+.footnote[
+From [gadenbuie/tidyexplain](https://github.com/gadenbuie/tidyexplain)
+]
+
+---
+
+## Joins in general (2)
+
+.pull-left[
+```{r echo=FALSE, out.width="80%", fig.align="center"}
+knitr::include_graphics("imgs/full-join.gif")
+```
+]
+
+--
+
+.pull-right[
+```{r echo=FALSE, out.width="80%", fig.align="center"}
+knitr::include_graphics("imgs/inner-join.gif")
+```
+]
+
+.footnote[
+From [gadenbuie/tidyexplain](https://github.com/gadenbuie/tidyexplain)
+]
+
+
+---
+
+## Putting it together
+
+```{r}
+sw_df %>%
+  unnest_wider(people) %>% 
+  select(name, starships) %>%
+  unnest_longer(starships) %>%
+  inner_join(ships, by = c("starships" = "url")) %>%
+  select(-starships) %>%
+  group_by(name) %>%
+  summarize(ships = list(ship), .groups = "drop")
+```
+
+---
+
+```{r}
+sw_df %>%
+  unnest_wider(people) %>% 
+  select(name, starships) %>%
+  unnest_longer(starships) %>%
+  inner_join(ships, by = c("starships" = "url")) %>%
+  select(-starships) %>%
+  group_by(name) %>%
+  summarize(ships = paste(ship, collapse = ", "), .groups = "drop")
+```
+
+---
+class: center, middle
+
+# hoist
+
+---
+
+## Complex heirarchical data
+
+Often we may encounter complex data structures where our goal is not to rectangle every value (which may not even be possible) but rather to rectangle a small subset of the data.
+
+--
+
+```{r}
+str(repurrrsive::discog, max.level = 3)
+```
+
+---
+
+```{r}
+tibble(disc = repurrrsive::discog) %>% 
+  hoist(
+    disc, 
+    info = "basic_information"
+  )
+```
+
+---
+
+```{r}
+tibble(disc = repurrrsive::discog) %>% 
+  hoist(
+    disc, 
+    id = "id",
+    info = "basic_information"
+  ) %>%
+  hoist(
+    info,
+    year = c("year"), title = c("title"),
+    artist = list("artists", 1, "name"),
+    label = list("labels", 1, "name")
+  )
+```
+
+---

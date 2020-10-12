@@ -1,0 +1,3952 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Lec 07 - tidyr</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Sem 1, 2020" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+    <link rel="stylesheet" href="slides.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Lec 07 - tidyr
+## <br/> Statistical Programming
+### Sem 1, 2020
+### <br/> Dr. Colin Rundel
+
+---
+
+exclude: true
+
+
+
+---
+class: middle
+
+.center[
+&lt;img src="imgs/hex-tidyr.png" width="45%" /&gt;
+]
+
+---
+class: middle, center
+
+# Wide vs. Long
+
+---
+
+## Wide -&gt; Long
+
+&lt;img src="imgs/tidyr_gather.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+.center[
+`gather` or `pivot_longer`
+]
+
+.footnote[ From [data import cheatsheet](https://github.com/rstudio/cheatsheets/blob/master/data-import.pdf) ]
+
+---
+
+## Long -&gt; Wide ()
+
+&lt;img src="imgs/tidyr_spread.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+.center[
+`spread` or `pivot_wider`
+]
+
+.footnote[ From [data import cheatsheet](https://github.com/rstudio/cheatsheets/blob/master/data-import.pdf) ]
+
+---
+
+## Separate
+
+&lt;img src="imgs/tidyr_separate.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+.footnote[ From [data import cheatsheet](https://github.com/rstudio/cheatsheets/blob/master/data-import.pdf) ]
+
+---
+
+## Unite
+
+&lt;img src="imgs/tidyr_unite.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+.footnote[ From [data import cheatsheet](https://github.com/rstudio/cheatsheets/blob/master/data-import.pdf) ]
+
+---
+
+## Grades
+
+Is the following data tidy?
+
+
+```r
+(grades = tibble::tribble(
+    ~name, ~hw_1, ~hw_2, ~hw_3, ~hw_4, ~proj_1, ~proj_2,
+  "Alice",    19,    19,    18,    20,      89,      95,
+  "Bob",      18,    20,    18,    16,      77,      88,
+  "Carol",    18,    20,    18,    17,      96,      99,
+  "Dave",     19,    19,    18,    19,      86,      82
+))
+```
+
+```
+## # A tibble: 4 x 7
+##   name   hw_1  hw_2  hw_3  hw_4 proj_1 proj_2
+##   &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
+## 1 Alice    19    19    18    20     89     95
+## 2 Bob      18    20    18    16     77     88
+## 3 Carol    18    20    18    17     96     99
+## 4 Dave     19    19    18    19     86     82
+```
+
+--
+
+How would we calculate a final score based on the following formula,
+`$$\text{score} = 0.5\,\frac{\sum\text{hw}_i}{80} + 0.5\,\frac{\sum\text{proj}_j}{200}$$`
+
+---
+
+## Semi-tidy approach
+
+
+```r
+grades %&gt;%
+  mutate(
+    hw_avg = (hw_1+hw_2+hw_3+hw_4)/4,
+    proj_avg = (proj_1+proj_2)/2
+  ) %&gt;%
+  mutate(
+    overall = 0.5*(proj_avg/100) + 0.5*(hw_avg/20)
+  )
+```
+
+```
+## # A tibble: 4 x 10
+##   name   hw_1  hw_2  hw_3  hw_4 proj_1 proj_2 hw_avg proj_avg overall
+##   &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;    &lt;dbl&gt;   &lt;dbl&gt;
+## 1 Alice    19    19    18    20     89     95   19       92     0.935
+## 2 Bob      18    20    18    16     77     88   18       82.5   0.862
+## 3 Carol    18    20    18    17     96     99   18.2     97.5   0.944
+## 4 Dave     19    19    18    19     86     82   18.8     84     0.889
+```
+
+---
+
+## pivot_longer (Wide -&gt; Long)
+
+
+```r
+tidyr::pivot_longer(
+  grades, 
+  cols = hw_1:proj_2, 
+  names_to = "assignment", 
+  values_to = "score"
+)
+```
+
+```
+## # A tibble: 24 x 3
+##    name  assignment score
+##    &lt;chr&gt; &lt;chr&gt;      &lt;dbl&gt;
+##  1 Alice hw_1          19
+##  2 Alice hw_2          19
+##  3 Alice hw_3          18
+##  4 Alice hw_4          20
+##  5 Alice proj_1        89
+##  6 Alice proj_2        95
+##  7 Bob   hw_1          18
+##  8 Bob   hw_2          20
+##  9 Bob   hw_3          18
+## 10 Bob   hw_4          16
+## # … with 14 more rows
+```
+
+---
+
+
+```r
+tidyr::pivot_longer(
+  grades, 
+  cols = hw_1:proj_2, 
+  names_to = c("type", "id"), 
+  names_sep = "_", 
+  values_to = "score"
+)
+```
+
+```
+## # A tibble: 24 x 4
+##    name  type  id    score
+##    &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;dbl&gt;
+##  1 Alice hw    1        19
+##  2 Alice hw    2        19
+##  3 Alice hw    3        18
+##  4 Alice hw    4        20
+##  5 Alice proj  1        89
+##  6 Alice proj  2        95
+##  7 Bob   hw    1        18
+##  8 Bob   hw    2        20
+##  9 Bob   hw    3        18
+## 10 Bob   hw    4        16
+## # … with 14 more rows
+```
+
+
+
+---
+
+## Tidy approach?
+
+
+```r
+grades %&gt;%
+  tidyr::pivot_longer(
+    cols = hw_1:proj_2, 
+    names_to = c("type", "id"),
+    names_sep = "_", 
+    values_to = "score"
+  ) %&gt;% 
+  group_by(name, type) %&gt;%
+  summarize(total = sum(score))
+```
+
+```
+## `summarise()` regrouping output by 'name' (override with `.groups` argument)
+```
+
+```
+## # A tibble: 8 x 3
+## # Groups:   name [4]
+##   name  type  total
+##   &lt;chr&gt; &lt;chr&gt; &lt;dbl&gt;
+## 1 Alice hw       76
+## 2 Alice proj    184
+## 3 Bob   hw       72
+## 4 Bob   proj    165
+## 5 Carol hw       73
+## 6 Carol proj    195
+## 7 Dave  hw       75
+## 8 Dave  proj    168
+```
+
+---
+
+## pivot_wider - (Long -&gt; Wide)
+
+
+```r
+grades %&gt;%
+  tidyr::pivot_longer(
+    cols = hw_1:proj_2, 
+    names_to = c("type", "id"), 
+    names_sep = "_", 
+    values_to = "score"
+  ) %&gt;% 
+  group_by(name, type) %&gt;%
+  summarize(total = sum(score)) %&gt;%
+  tidyr::pivot_wider(
+    names_from = type, 
+    values_from = total
+  )
+```
+
+```
+## `summarise()` regrouping output by 'name' (override with `.groups` argument)
+```
+
+```
+## # A tibble: 4 x 3
+## # Groups:   name [4]
+##   name     hw  proj
+##   &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1 Alice    76   184
+## 2 Bob      72   165
+## 3 Carol    73   195
+## 4 Dave     75   168
+```
+
+---
+
+## Wrapping up
+
+
+```r
+grades %&gt;%
+  tidyr::pivot_longer(
+    cols = hw_1:proj_2, 
+    names_to = c("type", "id"), 
+    names_sep = "_", 
+    values_to = "score"
+  ) %&gt;% 
+  group_by(name, type) %&gt;%
+  summarize(total = sum(score)) %&gt;%
+  tidyr::pivot_wider(
+    names_from = type, 
+    values_from = total
+  ) %&gt;%
+  mutate(
+    score = 0.5*(hw/80) + 0.5*(proj/200)
+  )
+```
+
+```
+## `summarise()` regrouping output by 'name' (override with `.groups` argument)
+```
+
+```
+## # A tibble: 4 x 4
+## # Groups:   name [4]
+##   name     hw  proj score
+##   &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1 Alice    76   184 0.935
+## 2 Bob      72   165 0.862
+## 3 Carol    73   195 0.944
+## 4 Dave     75   168 0.889
+```
+
+
+---
+class: center, middle
+
+# Rectangling
+
+---
+
+## Star Wars &amp; repurrrsive
+
+`repurrrsive` is a package that contains a number of interesting example data sets that are stored in a hierarchical format. Many come from web-based APIs which provide results as JSON. 
+
+
+```r
+str(repurrrsive::sw_people)
+```
+
+```
+## List of 87
+##  $ :List of 16
+##   ..$ name      : chr "Luke Skywalker"
+##   ..$ height    : chr "172"
+##   ..$ mass      : chr "77"
+##   ..$ hair_color: chr "blond"
+##   ..$ skin_color: chr "fair"
+##   ..$ eye_color : chr "blue"
+##   ..$ birth_year: chr "19BBY"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/1/"
+##   ..$ films     : chr [1:5] "http://swapi.co/api/films/6/" "http://swapi.co/api/films/3/" "http://swapi.co/api/films/2/" "http://swapi.co/api/films/1/" ...
+##   ..$ species   : chr "http://swapi.co/api/species/1/"
+##   ..$ vehicles  : chr [1:2] "http://swapi.co/api/vehicles/14/" "http://swapi.co/api/vehicles/30/"
+##   ..$ starships : chr [1:2] "http://swapi.co/api/starships/12/" "http://swapi.co/api/starships/22/"
+##   ..$ created   : chr "2014-12-09T13:50:51.644000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:56.891000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/1/"
+##  $ :List of 14
+##   ..$ name      : chr "C-3PO"
+##   ..$ height    : chr "167"
+##   ..$ mass      : chr "75"
+##   ..$ hair_color: chr "n/a"
+##   ..$ skin_color: chr "gold"
+##   ..$ eye_color : chr "yellow"
+##   ..$ birth_year: chr "112BBY"
+##   ..$ gender    : chr "n/a"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/1/"
+##   ..$ films     : chr [1:6] "http://swapi.co/api/films/5/" "http://swapi.co/api/films/4/" "http://swapi.co/api/films/6/" "http://swapi.co/api/films/3/" ...
+##   ..$ species   : chr "http://swapi.co/api/species/2/"
+##   ..$ created   : chr "2014-12-10T15:10:51.357000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.309000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/2/"
+##  $ :List of 14
+##   ..$ name      : chr "R2-D2"
+##   ..$ height    : chr "96"
+##   ..$ mass      : chr "32"
+##   ..$ hair_color: chr "n/a"
+##   ..$ skin_color: chr "white, blue"
+##   ..$ eye_color : chr "red"
+##   ..$ birth_year: chr "33BBY"
+##   ..$ gender    : chr "n/a"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/8/"
+##   ..$ films     : chr [1:7] "http://swapi.co/api/films/5/" "http://swapi.co/api/films/4/" "http://swapi.co/api/films/6/" "http://swapi.co/api/films/3/" ...
+##   ..$ species   : chr "http://swapi.co/api/species/2/"
+##   ..$ created   : chr "2014-12-10T15:11:50.376000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.311000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/3/"
+##  $ :List of 15
+##   ..$ name      : chr "Darth Vader"
+##   ..$ height    : chr "202"
+##   ..$ mass      : chr "136"
+##   ..$ hair_color: chr "none"
+##   ..$ skin_color: chr "white"
+##   ..$ eye_color : chr "yellow"
+##   ..$ birth_year: chr "41.9BBY"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/1/"
+##   ..$ films     : chr [1:4] "http://swapi.co/api/films/6/" "http://swapi.co/api/films/3/" "http://swapi.co/api/films/2/" "http://swapi.co/api/films/1/"
+##   ..$ species   : chr "http://swapi.co/api/species/1/"
+##   ..$ starships : chr "http://swapi.co/api/starships/13/"
+##   ..$ created   : chr "2014-12-10T15:18:20.704000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.313000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/4/"
+##  $ :List of 15
+##   ..$ name      : chr "Leia Organa"
+##   ..$ height    : chr "150"
+##   ..$ mass      : chr "49"
+##   ..$ hair_color: chr "brown"
+##   ..$ skin_color: chr "light"
+##   ..$ eye_color : chr "brown"
+##   ..$ birth_year: chr "19BBY"
+##   ..$ gender    : chr "female"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/2/"
+##   ..$ films     : chr [1:5] "http://swapi.co/api/films/6/" "http://swapi.co/api/films/3/" "http://swapi.co/api/films/2/" "http://swapi.co/api/films/1/" ...
+##   ..$ species   : chr "http://swapi.co/api/species/1/"
+##   ..$ vehicles  : chr "http://swapi.co/api/vehicles/30/"
+##   ..$ created   : chr "2014-12-10T15:20:09.791000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.315000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/5/"
+##  $ :List of 14
+##   ..$ name      : chr "Owen Lars"
+##   ..$ height    : chr "178"
+##   ..$ mass      : chr "120"
+##   ..$ hair_color: chr "brown, grey"
+##   ..$ skin_color: chr "light"
+##   ..$ eye_color : chr "blue"
+##   ..$ birth_year: chr "52BBY"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/1/"
+##   ..$ films     : chr [1:3] "http://swapi.co/api/films/5/" "http://swapi.co/api/films/6/" "http://swapi.co/api/films/1/"
+##   ..$ species   : chr "http://swapi.co/api/species/1/"
+##   ..$ created   : chr "2014-12-10T15:52:14.024000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.317000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/6/"
+##  $ :List of 14
+##   ..$ name      : chr "Beru Whitesun lars"
+##   ..$ height    : chr "165"
+##   ..$ mass      : chr "75"
+##   ..$ hair_color: chr "brown"
+##   ..$ skin_color: chr "light"
+##   ..$ eye_color : chr "blue"
+##   ..$ birth_year: chr "47BBY"
+##   ..$ gender    : chr "female"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/1/"
+##   ..$ films     : chr [1:3] "http://swapi.co/api/films/5/" "http://swapi.co/api/films/6/" "http://swapi.co/api/films/1/"
+##   ..$ species   : chr "http://swapi.co/api/species/1/"
+##   ..$ created   : chr "2014-12-10T15:53:41.121000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.319000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/7/"
+##  $ :List of 14
+##   ..$ name      : chr "R5-D4"
+##   ..$ height    : chr "97"
+##   ..$ mass      : chr "32"
+##   ..$ hair_color: chr "n/a"
+##   ..$ skin_color: chr "white, red"
+##   ..$ eye_color : chr "red"
+##   ..$ birth_year: chr "unknown"
+##   ..$ gender    : chr "n/a"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/1/"
+##   ..$ films     : chr "http://swapi.co/api/films/1/"
+##   ..$ species   : chr "http://swapi.co/api/species/2/"
+##   ..$ created   : chr "2014-12-10T15:57:50.959000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.321000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/8/"
+##  $ :List of 15
+##   ..$ name      : chr "Biggs Darklighter"
+##   ..$ height    : chr "183"
+##   ..$ mass      : chr "84"
+##   ..$ hair_color: chr "black"
+##   ..$ skin_color: chr "light"
+##   ..$ eye_color : chr "brown"
+##   ..$ birth_year: chr "24BBY"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/1/"
+##   ..$ films     : chr "http://swapi.co/api/films/1/"
+##   ..$ species   : chr "http://swapi.co/api/species/1/"
+##   ..$ starships : chr "http://swapi.co/api/starships/12/"
+##   ..$ created   : chr "2014-12-10T15:59:50.509000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.323000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/9/"
+##  $ :List of 16
+##   ..$ name      : chr "Obi-Wan Kenobi"
+##   ..$ height    : chr "182"
+##   ..$ mass      : chr "77"
+##   ..$ hair_color: chr "auburn, white"
+##   ..$ skin_color: chr "fair"
+##   ..$ eye_color : chr "blue-gray"
+##   ..$ birth_year: chr "57BBY"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/20/"
+##   ..$ films     : chr [1:6] "http://swapi.co/api/films/5/" "http://swapi.co/api/films/4/" "http://swapi.co/api/films/6/" "http://swapi.co/api/films/3/" ...
+##   ..$ species   : chr "http://swapi.co/api/species/1/"
+##   ..$ vehicles  : chr "http://swapi.co/api/vehicles/38/"
+##   ..$ starships : chr [1:5] "http://swapi.co/api/starships/48/" "http://swapi.co/api/starships/59/" "http://swapi.co/api/starships/64/" "http://swapi.co/api/starships/65/" ...
+##   ..$ created   : chr "2014-12-10T16:16:29.192000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.325000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/10/"
+##  $ :List of 16
+##   ..$ name      : chr "Anakin Skywalker"
+##   ..$ height    : chr "188"
+##   ..$ mass      : chr "84"
+##   ..$ hair_color: chr "blond"
+##   ..$ skin_color: chr "fair"
+##   ..$ eye_color : chr "blue"
+##   ..$ birth_year: chr "41.9BBY"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/1/"
+##   ..$ films     : chr [1:3] "http://swapi.co/api/films/5/" "http://swapi.co/api/films/4/" "http://swapi.co/api/films/6/"
+##   ..$ species   : chr "http://swapi.co/api/species/1/"
+##   ..$ vehicles  : chr [1:2] "http://swapi.co/api/vehicles/44/" "http://swapi.co/api/vehicles/46/"
+##   ..$ starships : chr [1:3] "http://swapi.co/api/starships/59/" "http://swapi.co/api/starships/65/" "http://swapi.co/api/starships/39/"
+##   ..$ created   : chr "2014-12-10T16:20:44.310000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.327000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/11/"
+##  $ :List of 14
+##   ..$ name      : chr "Wilhuff Tarkin"
+##   ..$ height    : chr "180"
+##   ..$ mass      : chr "unknown"
+##   ..$ hair_color: chr "auburn, grey"
+##   ..$ skin_color: chr "fair"
+##   ..$ eye_color : chr "blue"
+##   ..$ birth_year: chr "64BBY"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/21/"
+##   ..$ films     : chr [1:2] "http://swapi.co/api/films/6/" "http://swapi.co/api/films/1/"
+##   ..$ species   : chr "http://swapi.co/api/species/1/"
+##   ..$ created   : chr "2014-12-10T16:26:56.138000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.330000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/12/"
+##  $ :List of 16
+##   ..$ name      : chr "Chewbacca"
+##   ..$ height    : chr "228"
+##   ..$ mass      : chr "112"
+##   ..$ hair_color: chr "brown"
+##   ..$ skin_color: chr "unknown"
+##   ..$ eye_color : chr "blue"
+##   ..$ birth_year: chr "200BBY"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/14/"
+##   ..$ films     : chr [1:5] "http://swapi.co/api/films/6/" "http://swapi.co/api/films/3/" "http://swapi.co/api/films/2/" "http://swapi.co/api/films/1/" ...
+##   ..$ species   : chr "http://swapi.co/api/species/3/"
+##   ..$ vehicles  : chr "http://swapi.co/api/vehicles/19/"
+##   ..$ starships : chr [1:2] "http://swapi.co/api/starships/10/" "http://swapi.co/api/starships/22/"
+##   ..$ created   : chr "2014-12-10T16:42:45.066000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.332000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/13/"
+##  $ :List of 15
+##   ..$ name      : chr "Han Solo"
+##   ..$ height    : chr "180"
+##   ..$ mass      : chr "80"
+##   ..$ hair_color: chr "brown"
+##   ..$ skin_color: chr "fair"
+##   ..$ eye_color : chr "brown"
+##   ..$ birth_year: chr "29BBY"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/22/"
+##   ..$ films     : chr [1:4] "http://swapi.co/api/films/3/" "http://swapi.co/api/films/2/" "http://swapi.co/api/films/1/" "http://swapi.co/api/films/7/"
+##   ..$ species   : chr "http://swapi.co/api/species/1/"
+##   ..$ starships : chr [1:2] "http://swapi.co/api/starships/10/" "http://swapi.co/api/starships/22/"
+##   ..$ created   : chr "2014-12-10T16:49:14.582000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.334000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/14/"
+##  $ :List of 14
+##   ..$ name      : chr "Greedo"
+##   ..$ height    : chr "173"
+##   ..$ mass      : chr "74"
+##   ..$ hair_color: chr "n/a"
+##   ..$ skin_color: chr "green"
+##   ..$ eye_color : chr "black"
+##   ..$ birth_year: chr "44BBY"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/23/"
+##   ..$ films     : chr "http://swapi.co/api/films/1/"
+##   ..$ species   : chr "http://swapi.co/api/species/4/"
+##   ..$ created   : chr "2014-12-10T17:03:30.334000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.336000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/15/"
+##  $ :List of 14
+##   ..$ name      : chr "Jabba Desilijic Tiure"
+##   ..$ height    : chr "175"
+##   ..$ mass      : chr "1,358"
+##   ..$ hair_color: chr "n/a"
+##   ..$ skin_color: chr "green-tan, brown"
+##   ..$ eye_color : chr "orange"
+##   ..$ birth_year: chr "600BBY"
+##   ..$ gender    : chr "hermaphrodite"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/24/"
+##   ..$ films     : chr [1:3] "http://swapi.co/api/films/4/" "http://swapi.co/api/films/3/" "http://swapi.co/api/films/1/"
+##   ..$ species   : chr "http://swapi.co/api/species/5/"
+##   ..$ created   : chr "2014-12-10T17:11:31.638000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.338000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/16/"
+##  $ :List of 16
+##   ..$ name      : chr "Wedge Antilles"
+##   ..$ height    : chr "170"
+##   ..$ mass      : chr "77"
+##   ..$ hair_color: chr "brown"
+##   ..$ skin_color: chr "fair"
+##   ..$ eye_color : chr "hazel"
+##   ..$ birth_year: chr "21BBY"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/22/"
+##   ..$ films     : chr [1:3] "http://swapi.co/api/films/3/" "http://swapi.co/api/films/2/" "http://swapi.co/api/films/1/"
+##   ..$ species   : chr "http://swapi.co/api/species/1/"
+##   ..$ vehicles  : chr "http://swapi.co/api/vehicles/14/"
+##   ..$ starships : chr "http://swapi.co/api/starships/12/"
+##   ..$ created   : chr "2014-12-12T11:08:06.469000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.341000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/18/"
+##  $ :List of 15
+##   ..$ name      : chr "Jek Tono Porkins"
+##   ..$ height    : chr "180"
+##   ..$ mass      : chr "110"
+##   ..$ hair_color: chr "brown"
+##   ..$ skin_color: chr "fair"
+##   ..$ eye_color : chr "blue"
+##   ..$ birth_year: chr "unknown"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/26/"
+##   ..$ films     : chr "http://swapi.co/api/films/1/"
+##   ..$ species   : chr "http://swapi.co/api/species/1/"
+##   ..$ starships : chr "http://swapi.co/api/starships/12/"
+##   ..$ created   : chr "2014-12-12T11:16:56.569000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.343000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/19/"
+##  $ :List of 14
+##   ..$ name      : chr "Yoda"
+##   ..$ height    : chr "66"
+##   ..$ mass      : chr "17"
+##   ..$ hair_color: chr "white"
+##   ..$ skin_color: chr "green"
+##   ..$ eye_color : chr "brown"
+##   ..$ birth_year: chr "896BBY"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/28/"
+##   ..$ films     : chr [1:5] "http://swapi.co/api/films/5/" "http://swapi.co/api/films/4/" "http://swapi.co/api/films/6/" "http://swapi.co/api/films/3/" ...
+##   ..$ species   : chr "http://swapi.co/api/species/6/"
+##   ..$ created   : chr "2014-12-15T12:26:01.042000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.345000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/20/"
+##  $ :List of 14
+##   ..$ name      : chr "Palpatine"
+##   ..$ height    : chr "170"
+##   ..$ mass      : chr "75"
+##   ..$ hair_color: chr "grey"
+##   ..$ skin_color: chr "pale"
+##   ..$ eye_color : chr "yellow"
+##   ..$ birth_year: chr "82BBY"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/8/"
+##   ..$ films     : chr [1:5] "http://swapi.co/api/films/5/" "http://swapi.co/api/films/4/" "http://swapi.co/api/films/6/" "http://swapi.co/api/films/3/" ...
+##   ..$ species   : chr "http://swapi.co/api/species/1/"
+##   ..$ created   : chr "2014-12-15T12:48:05.971000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.347000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/21/"
+##  $ :List of 15
+##   ..$ name      : chr "Boba Fett"
+##   ..$ height    : chr "183"
+##   ..$ mass      : chr "78.2"
+##   ..$ hair_color: chr "black"
+##   ..$ skin_color: chr "fair"
+##   ..$ eye_color : chr "brown"
+##   ..$ birth_year: chr "31.5BBY"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/10/"
+##   ..$ films     : chr [1:3] "http://swapi.co/api/films/5/" "http://swapi.co/api/films/3/" "http://swapi.co/api/films/2/"
+##   ..$ species   : chr "http://swapi.co/api/species/1/"
+##   ..$ starships : chr "http://swapi.co/api/starships/21/"
+##   ..$ created   : chr "2014-12-15T12:49:32.457000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.349000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/22/"
+##  $ :List of 14
+##   ..$ name      : chr "IG-88"
+##   ..$ height    : chr "200"
+##   ..$ mass      : chr "140"
+##   ..$ hair_color: chr "none"
+##   ..$ skin_color: chr "metal"
+##   ..$ eye_color : chr "red"
+##   ..$ birth_year: chr "15BBY"
+##   ..$ gender    : chr "none"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/28/"
+##   ..$ films     : chr "http://swapi.co/api/films/2/"
+##   ..$ species   : chr "http://swapi.co/api/species/2/"
+##   ..$ created   : chr "2014-12-15T12:51:10.076000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.351000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/23/"
+##  $ :List of 14
+##   ..$ name      : chr "Bossk"
+##   ..$ height    : chr "190"
+##   ..$ mass      : chr "113"
+##   ..$ hair_color: chr "none"
+##   ..$ skin_color: chr "green"
+##   ..$ eye_color : chr "red"
+##   ..$ birth_year: chr "53BBY"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/29/"
+##   ..$ films     : chr "http://swapi.co/api/films/2/"
+##   ..$ species   : chr "http://swapi.co/api/species/7/"
+##   ..$ created   : chr "2014-12-15T12:53:49.297000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.355000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/24/"
+##  $ :List of 15
+##   ..$ name      : chr "Lando Calrissian"
+##   ..$ height    : chr "177"
+##   ..$ mass      : chr "79"
+##   ..$ hair_color: chr "black"
+##   ..$ skin_color: chr "dark"
+##   ..$ eye_color : chr "brown"
+##   ..$ birth_year: chr "31BBY"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/30/"
+##   ..$ films     : chr [1:2] "http://swapi.co/api/films/3/" "http://swapi.co/api/films/2/"
+##   ..$ species   : chr "http://swapi.co/api/species/1/"
+##   ..$ starships : chr "http://swapi.co/api/starships/10/"
+##   ..$ created   : chr "2014-12-15T12:56:32.683000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.357000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/25/"
+##  $ :List of 14
+##   ..$ name      : chr "Lobot"
+##   ..$ height    : chr "175"
+##   ..$ mass      : chr "79"
+##   ..$ hair_color: chr "none"
+##   ..$ skin_color: chr "light"
+##   ..$ eye_color : chr "blue"
+##   ..$ birth_year: chr "37BBY"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/6/"
+##   ..$ films     : chr "http://swapi.co/api/films/2/"
+##   ..$ species   : chr "http://swapi.co/api/species/1/"
+##   ..$ created   : chr "2014-12-15T13:01:57.178000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.359000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/26/"
+##  $ :List of 14
+##   ..$ name      : chr "Ackbar"
+##   ..$ height    : chr "180"
+##   ..$ mass      : chr "83"
+##   ..$ hair_color: chr "none"
+##   ..$ skin_color: chr "brown mottle"
+##   ..$ eye_color : chr "orange"
+##   ..$ birth_year: chr "41BBY"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/31/"
+##   ..$ films     : chr [1:2] "http://swapi.co/api/films/3/" "http://swapi.co/api/films/7/"
+##   ..$ species   : chr "http://swapi.co/api/species/8/"
+##   ..$ created   : chr "2014-12-18T11:07:50.584000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.362000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/27/"
+##  $ :List of 14
+##   ..$ name      : chr "Mon Mothma"
+##   ..$ height    : chr "150"
+##   ..$ mass      : chr "unknown"
+##   ..$ hair_color: chr "auburn"
+##   ..$ skin_color: chr "fair"
+##   ..$ eye_color : chr "blue"
+##   ..$ birth_year: chr "48BBY"
+##   ..$ gender    : chr "female"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/32/"
+##   ..$ films     : chr "http://swapi.co/api/films/3/"
+##   ..$ species   : chr "http://swapi.co/api/species/1/"
+##   ..$ created   : chr "2014-12-18T11:12:38.895000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.364000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/28/"
+##  $ :List of 15
+##   ..$ name      : chr "Arvel Crynyd"
+##   ..$ height    : chr "unknown"
+##   ..$ mass      : chr "unknown"
+##   ..$ hair_color: chr "brown"
+##   ..$ skin_color: chr "fair"
+##   ..$ eye_color : chr "brown"
+##   ..$ birth_year: chr "unknown"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/28/"
+##   ..$ films     : chr "http://swapi.co/api/films/3/"
+##   ..$ species   : chr "http://swapi.co/api/species/1/"
+##   ..$ starships : chr "http://swapi.co/api/starships/28/"
+##   ..$ created   : chr "2014-12-18T11:16:33.020000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.367000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/29/"
+##  $ :List of 14
+##   ..$ name      : chr "Wicket Systri Warrick"
+##   ..$ height    : chr "88"
+##   ..$ mass      : chr "20"
+##   ..$ hair_color: chr "brown"
+##   ..$ skin_color: chr "brown"
+##   ..$ eye_color : chr "brown"
+##   ..$ birth_year: chr "8BBY"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/7/"
+##   ..$ films     : chr "http://swapi.co/api/films/3/"
+##   ..$ species   : chr "http://swapi.co/api/species/9/"
+##   ..$ created   : chr "2014-12-18T11:21:58.954000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.369000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/30/"
+##  $ :List of 15
+##   ..$ name      : chr "Nien Nunb"
+##   ..$ height    : chr "160"
+##   ..$ mass      : chr "68"
+##   ..$ hair_color: chr "none"
+##   ..$ skin_color: chr "grey"
+##   ..$ eye_color : chr "black"
+##   ..$ birth_year: chr "unknown"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/33/"
+##   ..$ films     : chr "http://swapi.co/api/films/3/"
+##   ..$ species   : chr "http://swapi.co/api/species/10/"
+##   ..$ starships : chr "http://swapi.co/api/starships/10/"
+##   ..$ created   : chr "2014-12-18T11:26:18.541000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.371000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/31/"
+##  $ :List of 15
+##   ..$ name      : chr "Qui-Gon Jinn"
+##   ..$ height    : chr "193"
+##   ..$ mass      : chr "89"
+##   ..$ hair_color: chr "brown"
+##   ..$ skin_color: chr "fair"
+##   ..$ eye_color : chr "blue"
+##   ..$ birth_year: chr "92BBY"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/28/"
+##   ..$ films     : chr "http://swapi.co/api/films/4/"
+##   ..$ species   : chr "http://swapi.co/api/species/1/"
+##   ..$ vehicles  : chr "http://swapi.co/api/vehicles/38/"
+##   ..$ created   : chr "2014-12-19T16:54:53.618000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.375000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/32/"
+##  $ :List of 14
+##   ..$ name      : chr "Nute Gunray"
+##   ..$ height    : chr "191"
+##   ..$ mass      : chr "90"
+##   ..$ hair_color: chr "none"
+##   ..$ skin_color: chr "mottled green"
+##   ..$ eye_color : chr "red"
+##   ..$ birth_year: chr "unknown"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/18/"
+##   ..$ films     : chr [1:3] "http://swapi.co/api/films/5/" "http://swapi.co/api/films/4/" "http://swapi.co/api/films/6/"
+##   ..$ species   : chr "http://swapi.co/api/species/11/"
+##   ..$ created   : chr "2014-12-19T17:05:57.357000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.377000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/33/"
+##  $ :List of 14
+##   ..$ name      : chr "Finis Valorum"
+##   ..$ height    : chr "170"
+##   ..$ mass      : chr "unknown"
+##   ..$ hair_color: chr "blond"
+##   ..$ skin_color: chr "fair"
+##   ..$ eye_color : chr "blue"
+##   ..$ birth_year: chr "91BBY"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/9/"
+##   ..$ films     : chr "http://swapi.co/api/films/4/"
+##   ..$ species   : chr "http://swapi.co/api/species/1/"
+##   ..$ created   : chr "2014-12-19T17:21:45.915000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.379000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/34/"
+##  $ :List of 14
+##   ..$ name      : chr "Jar Jar Binks"
+##   ..$ height    : chr "196"
+##   ..$ mass      : chr "66"
+##   ..$ hair_color: chr "none"
+##   ..$ skin_color: chr "orange"
+##   ..$ eye_color : chr "orange"
+##   ..$ birth_year: chr "52BBY"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/8/"
+##   ..$ films     : chr [1:2] "http://swapi.co/api/films/5/" "http://swapi.co/api/films/4/"
+##   ..$ species   : chr "http://swapi.co/api/species/12/"
+##   ..$ created   : chr "2014-12-19T17:29:32.489000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.383000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/36/"
+##  $ :List of 14
+##   ..$ name      : chr "Roos Tarpals"
+##   ..$ height    : chr "224"
+##   ..$ mass      : chr "82"
+##   ..$ hair_color: chr "none"
+##   ..$ skin_color: chr "grey"
+##   ..$ eye_color : chr "orange"
+##   ..$ birth_year: chr "unknown"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/8/"
+##   ..$ films     : chr "http://swapi.co/api/films/4/"
+##   ..$ species   : chr "http://swapi.co/api/species/12/"
+##   ..$ created   : chr "2014-12-19T17:32:56.741000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.385000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/37/"
+##  $ :List of 14
+##   ..$ name      : chr "Rugor Nass"
+##   ..$ height    : chr "206"
+##   ..$ mass      : chr "unknown"
+##   ..$ hair_color: chr "none"
+##   ..$ skin_color: chr "green"
+##   ..$ eye_color : chr "orange"
+##   ..$ birth_year: chr "unknown"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/8/"
+##   ..$ films     : chr "http://swapi.co/api/films/4/"
+##   ..$ species   : chr "http://swapi.co/api/species/12/"
+##   ..$ created   : chr "2014-12-19T17:33:38.909000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.388000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/38/"
+##  $ :List of 14
+##   ..$ name      : chr "Ric Olié"
+##   ..$ height    : chr "183"
+##   ..$ mass      : chr "unknown"
+##   ..$ hair_color: chr "brown"
+##   ..$ skin_color: chr "fair"
+##   ..$ eye_color : chr "blue"
+##   ..$ birth_year: chr "unknown"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/8/"
+##   ..$ films     : chr "http://swapi.co/api/films/4/"
+##   ..$ starships : chr "http://swapi.co/api/starships/40/"
+##   ..$ created   : chr "2014-12-19T17:45:01.522000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.392000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/39/"
+##  $ :List of 14
+##   ..$ name      : chr "Watto"
+##   ..$ height    : chr "137"
+##   ..$ mass      : chr "unknown"
+##   ..$ hair_color: chr "black"
+##   ..$ skin_color: chr "blue, grey"
+##   ..$ eye_color : chr "yellow"
+##   ..$ birth_year: chr "unknown"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/34/"
+##   ..$ films     : chr [1:2] "http://swapi.co/api/films/5/" "http://swapi.co/api/films/4/"
+##   ..$ species   : chr "http://swapi.co/api/species/13/"
+##   ..$ created   : chr "2014-12-19T17:48:54.647000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.395000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/40/"
+##  $ :List of 14
+##   ..$ name      : chr "Sebulba"
+##   ..$ height    : chr "112"
+##   ..$ mass      : chr "40"
+##   ..$ hair_color: chr "none"
+##   ..$ skin_color: chr "grey, red"
+##   ..$ eye_color : chr "orange"
+##   ..$ birth_year: chr "unknown"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/35/"
+##   ..$ films     : chr "http://swapi.co/api/films/4/"
+##   ..$ species   : chr "http://swapi.co/api/species/14/"
+##   ..$ created   : chr "2014-12-19T17:53:02.586000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.397000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/41/"
+##  $ :List of 13
+##   ..$ name      : chr "Quarsh Panaka"
+##   ..$ height    : chr "183"
+##   ..$ mass      : chr "unknown"
+##   ..$ hair_color: chr "black"
+##   ..$ skin_color: chr "dark"
+##   ..$ eye_color : chr "brown"
+##   ..$ birth_year: chr "62BBY"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/8/"
+##   ..$ films     : chr "http://swapi.co/api/films/4/"
+##   ..$ created   : chr "2014-12-19T17:55:43.348000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.399000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/42/"
+##  $ :List of 14
+##   ..$ name      : chr "Shmi Skywalker"
+##   ..$ height    : chr "163"
+##   ..$ mass      : chr "unknown"
+##   ..$ hair_color: chr "black"
+##   ..$ skin_color: chr "fair"
+##   ..$ eye_color : chr "brown"
+##   ..$ birth_year: chr "72BBY"
+##   ..$ gender    : chr "female"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/1/"
+##   ..$ films     : chr [1:2] "http://swapi.co/api/films/5/" "http://swapi.co/api/films/4/"
+##   ..$ species   : chr "http://swapi.co/api/species/1/"
+##   ..$ created   : chr "2014-12-19T17:57:41.191000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.401000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/43/"
+##  $ :List of 16
+##   ..$ name      : chr "Darth Maul"
+##   ..$ height    : chr "175"
+##   ..$ mass      : chr "80"
+##   ..$ hair_color: chr "none"
+##   ..$ skin_color: chr "red"
+##   ..$ eye_color : chr "yellow"
+##   ..$ birth_year: chr "54BBY"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/36/"
+##   ..$ films     : chr "http://swapi.co/api/films/4/"
+##   ..$ species   : chr "http://swapi.co/api/species/22/"
+##   ..$ vehicles  : chr "http://swapi.co/api/vehicles/42/"
+##   ..$ starships : chr "http://swapi.co/api/starships/41/"
+##   ..$ created   : chr "2014-12-19T18:00:41.929000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.403000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/44/"
+##  $ :List of 14
+##   ..$ name      : chr "Bib Fortuna"
+##   ..$ height    : chr "180"
+##   ..$ mass      : chr "unknown"
+##   ..$ hair_color: chr "none"
+##   ..$ skin_color: chr "pale"
+##   ..$ eye_color : chr "pink"
+##   ..$ birth_year: chr "unknown"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/37/"
+##   ..$ films     : chr "http://swapi.co/api/films/3/"
+##   ..$ species   : chr "http://swapi.co/api/species/15/"
+##   ..$ created   : chr "2014-12-20T09:47:02.512000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.407000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/45/"
+##  $ :List of 14
+##   ..$ name      : chr "Ayla Secura"
+##   ..$ height    : chr "178"
+##   ..$ mass      : chr "55"
+##   ..$ hair_color: chr "none"
+##   ..$ skin_color: chr "blue"
+##   ..$ eye_color : chr "hazel"
+##   ..$ birth_year: chr "48BBY"
+##   ..$ gender    : chr "female"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/37/"
+##   ..$ films     : chr [1:3] "http://swapi.co/api/films/5/" "http://swapi.co/api/films/4/" "http://swapi.co/api/films/6/"
+##   ..$ species   : chr "http://swapi.co/api/species/15/"
+##   ..$ created   : chr "2014-12-20T09:48:01.172000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.409000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/46/"
+##  $ :List of 14
+##   ..$ name      : chr "Dud Bolt"
+##   ..$ height    : chr "94"
+##   ..$ mass      : chr "45"
+##   ..$ hair_color: chr "none"
+##   ..$ skin_color: chr "blue, grey"
+##   ..$ eye_color : chr "yellow"
+##   ..$ birth_year: chr "unknown"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/39/"
+##   ..$ films     : chr "http://swapi.co/api/films/4/"
+##   ..$ species   : chr "http://swapi.co/api/species/17/"
+##   ..$ created   : chr "2014-12-20T09:57:31.858000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.414000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/48/"
+##  $ :List of 14
+##   ..$ name      : chr "Gasgano"
+##   ..$ height    : chr "122"
+##   ..$ mass      : chr "unknown"
+##   ..$ hair_color: chr "none"
+##   ..$ skin_color: chr "white, blue"
+##   ..$ eye_color : chr "black"
+##   ..$ birth_year: chr "unknown"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/40/"
+##   ..$ films     : chr "http://swapi.co/api/films/4/"
+##   ..$ species   : chr "http://swapi.co/api/species/18/"
+##   ..$ created   : chr "2014-12-20T10:02:12.223000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.416000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/49/"
+##  $ :List of 14
+##   ..$ name      : chr "Ben Quadinaros"
+##   ..$ height    : chr "163"
+##   ..$ mass      : chr "65"
+##   ..$ hair_color: chr "none"
+##   ..$ skin_color: chr "grey, green, yellow"
+##   ..$ eye_color : chr "orange"
+##   ..$ birth_year: chr "unknown"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/41/"
+##   ..$ films     : chr "http://swapi.co/api/films/4/"
+##   ..$ species   : chr "http://swapi.co/api/species/19/"
+##   ..$ created   : chr "2014-12-20T10:08:33.777000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.417000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/50/"
+##  $ :List of 14
+##   ..$ name      : chr "Mace Windu"
+##   ..$ height    : chr "188"
+##   ..$ mass      : chr "84"
+##   ..$ hair_color: chr "none"
+##   ..$ skin_color: chr "dark"
+##   ..$ eye_color : chr "brown"
+##   ..$ birth_year: chr "72BBY"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/42/"
+##   ..$ films     : chr [1:3] "http://swapi.co/api/films/5/" "http://swapi.co/api/films/4/" "http://swapi.co/api/films/6/"
+##   ..$ species   : chr "http://swapi.co/api/species/1/"
+##   ..$ created   : chr "2014-12-20T10:12:30.846000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.420000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/51/"
+##  $ :List of 14
+##   ..$ name      : chr "Ki-Adi-Mundi"
+##   ..$ height    : chr "198"
+##   ..$ mass      : chr "82"
+##   ..$ hair_color: chr "white"
+##   ..$ skin_color: chr "pale"
+##   ..$ eye_color : chr "yellow"
+##   ..$ birth_year: chr "92BBY"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/43/"
+##   ..$ films     : chr [1:3] "http://swapi.co/api/films/5/" "http://swapi.co/api/films/4/" "http://swapi.co/api/films/6/"
+##   ..$ species   : chr "http://swapi.co/api/species/20/"
+##   ..$ created   : chr "2014-12-20T10:15:32.293000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.422000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/52/"
+##  $ :List of 14
+##   ..$ name      : chr "Kit Fisto"
+##   ..$ height    : chr "196"
+##   ..$ mass      : chr "87"
+##   ..$ hair_color: chr "none"
+##   ..$ skin_color: chr "green"
+##   ..$ eye_color : chr "black"
+##   ..$ birth_year: chr "unknown"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/44/"
+##   ..$ films     : chr [1:3] "http://swapi.co/api/films/5/" "http://swapi.co/api/films/4/" "http://swapi.co/api/films/6/"
+##   ..$ species   : chr "http://swapi.co/api/species/21/"
+##   ..$ created   : chr "2014-12-20T10:18:57.202000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.424000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/53/"
+##  $ :List of 14
+##   ..$ name      : chr "Eeth Koth"
+##   ..$ height    : chr "171"
+##   ..$ mass      : chr "unknown"
+##   ..$ hair_color: chr "black"
+##   ..$ skin_color: chr "brown"
+##   ..$ eye_color : chr "brown"
+##   ..$ birth_year: chr "unknown"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/45/"
+##   ..$ films     : chr [1:2] "http://swapi.co/api/films/4/" "http://swapi.co/api/films/6/"
+##   ..$ species   : chr "http://swapi.co/api/species/22/"
+##   ..$ created   : chr "2014-12-20T10:26:47.902000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.427000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/54/"
+##  $ :List of 14
+##   ..$ name      : chr "Adi Gallia"
+##   ..$ height    : chr "184"
+##   ..$ mass      : chr "50"
+##   ..$ hair_color: chr "none"
+##   ..$ skin_color: chr "dark"
+##   ..$ eye_color : chr "blue"
+##   ..$ birth_year: chr "unknown"
+##   ..$ gender    : chr "female"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/9/"
+##   ..$ films     : chr [1:2] "http://swapi.co/api/films/4/" "http://swapi.co/api/films/6/"
+##   ..$ species   : chr "http://swapi.co/api/species/23/"
+##   ..$ created   : chr "2014-12-20T10:29:11.661000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.432000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/55/"
+##  $ :List of 14
+##   ..$ name      : chr "Saesee Tiin"
+##   ..$ height    : chr "188"
+##   ..$ mass      : chr "unknown"
+##   ..$ hair_color: chr "none"
+##   ..$ skin_color: chr "pale"
+##   ..$ eye_color : chr "orange"
+##   ..$ birth_year: chr "unknown"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/47/"
+##   ..$ films     : chr [1:2] "http://swapi.co/api/films/4/" "http://swapi.co/api/films/6/"
+##   ..$ species   : chr "http://swapi.co/api/species/24/"
+##   ..$ created   : chr "2014-12-20T10:32:11.669000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.434000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/56/"
+##  $ :List of 14
+##   ..$ name      : chr "Yarael Poof"
+##   ..$ height    : chr "264"
+##   ..$ mass      : chr "unknown"
+##   ..$ hair_color: chr "none"
+##   ..$ skin_color: chr "white"
+##   ..$ eye_color : chr "yellow"
+##   ..$ birth_year: chr "unknown"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/48/"
+##   ..$ films     : chr "http://swapi.co/api/films/4/"
+##   ..$ species   : chr "http://swapi.co/api/species/25/"
+##   ..$ created   : chr "2014-12-20T10:34:48.725000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.437000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/57/"
+##  $ :List of 15
+##   ..$ name      : chr "Plo Koon"
+##   ..$ height    : chr "188"
+##   ..$ mass      : chr "80"
+##   ..$ hair_color: chr "none"
+##   ..$ skin_color: chr "orange"
+##   ..$ eye_color : chr "black"
+##   ..$ birth_year: chr "22BBY"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/49/"
+##   ..$ films     : chr [1:3] "http://swapi.co/api/films/5/" "http://swapi.co/api/films/4/" "http://swapi.co/api/films/6/"
+##   ..$ species   : chr "http://swapi.co/api/species/26/"
+##   ..$ starships : chr "http://swapi.co/api/starships/48/"
+##   ..$ created   : chr "2014-12-20T10:49:19.859000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.439000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/58/"
+##  $ :List of 14
+##   ..$ name      : chr "Mas Amedda"
+##   ..$ height    : chr "196"
+##   ..$ mass      : chr "unknown"
+##   ..$ hair_color: chr "none"
+##   ..$ skin_color: chr "blue"
+##   ..$ eye_color : chr "blue"
+##   ..$ birth_year: chr "unknown"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/50/"
+##   ..$ films     : chr [1:2] "http://swapi.co/api/films/5/" "http://swapi.co/api/films/4/"
+##   ..$ species   : chr "http://swapi.co/api/species/27/"
+##   ..$ created   : chr "2014-12-20T10:53:26.457000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.442000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/59/"
+##  $ :List of 15
+##   ..$ name      : chr "Gregar Typho"
+##   ..$ height    : chr "185"
+##   ..$ mass      : chr "85"
+##   ..$ hair_color: chr "black"
+##   ..$ skin_color: chr "dark"
+##   ..$ eye_color : chr "brown"
+##   ..$ birth_year: chr "unknown"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/8/"
+##   ..$ films     : chr "http://swapi.co/api/films/5/"
+##   ..$ species   : chr "http://swapi.co/api/species/1/"
+##   ..$ starships : chr "http://swapi.co/api/starships/39/"
+##   ..$ created   : chr "2014-12-20T11:10:10.381000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.445000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/60/"
+##  $ :List of 14
+##   ..$ name      : chr "Cordé"
+##   ..$ height    : chr "157"
+##   ..$ mass      : chr "unknown"
+##   ..$ hair_color: chr "brown"
+##   ..$ skin_color: chr "light"
+##   ..$ eye_color : chr "brown"
+##   ..$ birth_year: chr "unknown"
+##   ..$ gender    : chr "female"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/8/"
+##   ..$ films     : chr "http://swapi.co/api/films/5/"
+##   ..$ species   : chr "http://swapi.co/api/species/1/"
+##   ..$ created   : chr "2014-12-20T11:11:39.630000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.449000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/61/"
+##  $ :List of 14
+##   ..$ name      : chr "Cliegg Lars"
+##   ..$ height    : chr "183"
+##   ..$ mass      : chr "unknown"
+##   ..$ hair_color: chr "brown"
+##   ..$ skin_color: chr "fair"
+##   ..$ eye_color : chr "blue"
+##   ..$ birth_year: chr "82BBY"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/1/"
+##   ..$ films     : chr "http://swapi.co/api/films/5/"
+##   ..$ species   : chr "http://swapi.co/api/species/1/"
+##   ..$ created   : chr "2014-12-20T15:59:03.958000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.451000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/62/"
+##  $ :List of 14
+##   ..$ name      : chr "Poggle the Lesser"
+##   ..$ height    : chr "183"
+##   ..$ mass      : chr "80"
+##   ..$ hair_color: chr "none"
+##   ..$ skin_color: chr "green"
+##   ..$ eye_color : chr "yellow"
+##   ..$ birth_year: chr "unknown"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/11/"
+##   ..$ films     : chr [1:2] "http://swapi.co/api/films/5/" "http://swapi.co/api/films/6/"
+##   ..$ species   : chr "http://swapi.co/api/species/28/"
+##   ..$ created   : chr "2014-12-20T16:40:43.977000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.453000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/63/"
+##  $ :List of 14
+##   ..$ name      : chr "Luminara Unduli"
+##   ..$ height    : chr "170"
+##   ..$ mass      : chr "56.2"
+##   ..$ hair_color: chr "black"
+##   ..$ skin_color: chr "yellow"
+##   ..$ eye_color : chr "blue"
+##   ..$ birth_year: chr "58BBY"
+##   ..$ gender    : chr "female"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/51/"
+##   ..$ films     : chr [1:2] "http://swapi.co/api/films/5/" "http://swapi.co/api/films/6/"
+##   ..$ species   : chr "http://swapi.co/api/species/29/"
+##   ..$ created   : chr "2014-12-20T16:45:53.668000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.455000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/64/"
+##  $ :List of 14
+##   ..$ name      : chr "Barriss Offee"
+##   ..$ height    : chr "166"
+##   ..$ mass      : chr "50"
+##   ..$ hair_color: chr "black"
+##   ..$ skin_color: chr "yellow"
+##   ..$ eye_color : chr "blue"
+##   ..$ birth_year: chr "40BBY"
+##   ..$ gender    : chr "female"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/51/"
+##   ..$ films     : chr "http://swapi.co/api/films/5/"
+##   ..$ species   : chr "http://swapi.co/api/species/29/"
+##   ..$ created   : chr "2014-12-20T16:46:40.440000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.457000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/65/"
+##  $ :List of 14
+##   ..$ name      : chr "Dormé"
+##   ..$ height    : chr "165"
+##   ..$ mass      : chr "unknown"
+##   ..$ hair_color: chr "brown"
+##   ..$ skin_color: chr "light"
+##   ..$ eye_color : chr "brown"
+##   ..$ birth_year: chr "unknown"
+##   ..$ gender    : chr "female"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/8/"
+##   ..$ films     : chr "http://swapi.co/api/films/5/"
+##   ..$ species   : chr "http://swapi.co/api/species/1/"
+##   ..$ created   : chr "2014-12-20T16:49:14.640000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.460000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/66/"
+##  $ :List of 15
+##   ..$ name      : chr "Dooku"
+##   ..$ height    : chr "193"
+##   ..$ mass      : chr "80"
+##   ..$ hair_color: chr "white"
+##   ..$ skin_color: chr "fair"
+##   ..$ eye_color : chr "brown"
+##   ..$ birth_year: chr "102BBY"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/52/"
+##   ..$ films     : chr [1:2] "http://swapi.co/api/films/5/" "http://swapi.co/api/films/6/"
+##   ..$ species   : chr "http://swapi.co/api/species/1/"
+##   ..$ vehicles  : chr "http://swapi.co/api/vehicles/55/"
+##   ..$ created   : chr "2014-12-20T16:52:14.726000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.462000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/67/"
+##  $ :List of 14
+##   ..$ name      : chr "Bail Prestor Organa"
+##   ..$ height    : chr "191"
+##   ..$ mass      : chr "unknown"
+##   ..$ hair_color: chr "black"
+##   ..$ skin_color: chr "tan"
+##   ..$ eye_color : chr "brown"
+##   ..$ birth_year: chr "67BBY"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/2/"
+##   ..$ films     : chr [1:2] "http://swapi.co/api/films/5/" "http://swapi.co/api/films/6/"
+##   ..$ species   : chr "http://swapi.co/api/species/1/"
+##   ..$ created   : chr "2014-12-20T16:53:08.575000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.463000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/68/"
+##  $ :List of 14
+##   ..$ name      : chr "Jango Fett"
+##   ..$ height    : chr "183"
+##   ..$ mass      : chr "79"
+##   ..$ hair_color: chr "black"
+##   ..$ skin_color: chr "tan"
+##   ..$ eye_color : chr "brown"
+##   ..$ birth_year: chr "66BBY"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/53/"
+##   ..$ films     : chr "http://swapi.co/api/films/5/"
+##   ..$ species   : chr "http://swapi.co/api/species/1/"
+##   ..$ created   : chr "2014-12-20T16:54:41.620000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.465000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/69/"
+##  $ :List of 15
+##   ..$ name      : chr "Zam Wesell"
+##   ..$ height    : chr "168"
+##   ..$ mass      : chr "55"
+##   ..$ hair_color: chr "blonde"
+##   ..$ skin_color: chr "fair, green, yellow"
+##   ..$ eye_color : chr "yellow"
+##   ..$ birth_year: chr "unknown"
+##   ..$ gender    : chr "female"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/54/"
+##   ..$ films     : chr "http://swapi.co/api/films/5/"
+##   ..$ species   : chr "http://swapi.co/api/species/30/"
+##   ..$ vehicles  : chr "http://swapi.co/api/vehicles/45/"
+##   ..$ created   : chr "2014-12-20T16:57:44.471000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.468000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/70/"
+##  $ :List of 14
+##   ..$ name      : chr "Dexter Jettster"
+##   ..$ height    : chr "198"
+##   ..$ mass      : chr "102"
+##   ..$ hair_color: chr "none"
+##   ..$ skin_color: chr "brown"
+##   ..$ eye_color : chr "yellow"
+##   ..$ birth_year: chr "unknown"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/55/"
+##   ..$ films     : chr "http://swapi.co/api/films/5/"
+##   ..$ species   : chr "http://swapi.co/api/species/31/"
+##   ..$ created   : chr "2014-12-20T17:28:27.248000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.470000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/71/"
+##  $ :List of 14
+##   ..$ name      : chr "Lama Su"
+##   ..$ height    : chr "229"
+##   ..$ mass      : chr "88"
+##   ..$ hair_color: chr "none"
+##   ..$ skin_color: chr "grey"
+##   ..$ eye_color : chr "black"
+##   ..$ birth_year: chr "unknown"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/10/"
+##   ..$ films     : chr "http://swapi.co/api/films/5/"
+##   ..$ species   : chr "http://swapi.co/api/species/32/"
+##   ..$ created   : chr "2014-12-20T17:30:50.416000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.473000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/72/"
+##  $ :List of 14
+##   ..$ name      : chr "Taun We"
+##   ..$ height    : chr "213"
+##   ..$ mass      : chr "unknown"
+##   ..$ hair_color: chr "none"
+##   ..$ skin_color: chr "grey"
+##   ..$ eye_color : chr "black"
+##   ..$ birth_year: chr "unknown"
+##   ..$ gender    : chr "female"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/10/"
+##   ..$ films     : chr "http://swapi.co/api/films/5/"
+##   ..$ species   : chr "http://swapi.co/api/species/32/"
+##   ..$ created   : chr "2014-12-20T17:31:21.195000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.474000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/73/"
+##  $ :List of 14
+##   ..$ name      : chr "Jocasta Nu"
+##   ..$ height    : chr "167"
+##   ..$ mass      : chr "unknown"
+##   ..$ hair_color: chr "white"
+##   ..$ skin_color: chr "fair"
+##   ..$ eye_color : chr "blue"
+##   ..$ birth_year: chr "unknown"
+##   ..$ gender    : chr "female"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/9/"
+##   ..$ films     : chr "http://swapi.co/api/films/5/"
+##   ..$ species   : chr "http://swapi.co/api/species/1/"
+##   ..$ created   : chr "2014-12-20T17:32:51.996000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.476000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/74/"
+##  $ :List of 14
+##   ..$ name      : chr "Ratts Tyerell"
+##   ..$ height    : chr "79"
+##   ..$ mass      : chr "15"
+##   ..$ hair_color: chr "none"
+##   ..$ skin_color: chr "grey, blue"
+##   ..$ eye_color : chr "unknown"
+##   ..$ birth_year: chr "unknown"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/38/"
+##   ..$ films     : chr "http://swapi.co/api/films/4/"
+##   ..$ species   : chr "http://swapi.co/api/species/16/"
+##   ..$ created   : chr "2014-12-20T09:53:15.086000Z"
+##   ..$ edited    : chr "2016-06-30T12:52:19.604868Z"
+##   ..$ url       : chr "http://swapi.co/api/people/47/"
+##  $ :List of 13
+##   ..$ name      : chr "R4-P17"
+##   ..$ height    : chr "96"
+##   ..$ mass      : chr "unknown"
+##   ..$ hair_color: chr "none"
+##   ..$ skin_color: chr "silver, red"
+##   ..$ eye_color : chr "red, blue"
+##   ..$ birth_year: chr "unknown"
+##   ..$ gender    : chr "female"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/28/"
+##   ..$ films     : chr [1:2] "http://swapi.co/api/films/5/" "http://swapi.co/api/films/6/"
+##   ..$ created   : chr "2014-12-20T17:43:36.409000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.478000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/75/"
+##  $ :List of 14
+##   ..$ name      : chr "Wat Tambor"
+##   ..$ height    : chr "193"
+##   ..$ mass      : chr "48"
+##   ..$ hair_color: chr "none"
+##   ..$ skin_color: chr "green, grey"
+##   ..$ eye_color : chr "unknown"
+##   ..$ birth_year: chr "unknown"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/56/"
+##   ..$ films     : chr "http://swapi.co/api/films/5/"
+##   ..$ species   : chr "http://swapi.co/api/species/33/"
+##   ..$ created   : chr "2014-12-20T17:53:52.607000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.481000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/76/"
+##  $ :List of 14
+##   ..$ name      : chr "San Hill"
+##   ..$ height    : chr "191"
+##   ..$ mass      : chr "unknown"
+##   ..$ hair_color: chr "none"
+##   ..$ skin_color: chr "grey"
+##   ..$ eye_color : chr "gold"
+##   ..$ birth_year: chr "unknown"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/57/"
+##   ..$ films     : chr "http://swapi.co/api/films/5/"
+##   ..$ species   : chr "http://swapi.co/api/species/34/"
+##   ..$ created   : chr "2014-12-20T17:58:17.049000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.484000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/77/"
+##  $ :List of 14
+##   ..$ name      : chr "Shaak Ti"
+##   ..$ height    : chr "178"
+##   ..$ mass      : chr "57"
+##   ..$ hair_color: chr "none"
+##   ..$ skin_color: chr "red, blue, white"
+##   ..$ eye_color : chr "black"
+##   ..$ birth_year: chr "unknown"
+##   ..$ gender    : chr "female"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/58/"
+##   ..$ films     : chr [1:2] "http://swapi.co/api/films/5/" "http://swapi.co/api/films/6/"
+##   ..$ species   : chr "http://swapi.co/api/species/35/"
+##   ..$ created   : chr "2014-12-20T18:44:01.103000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.486000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/78/"
+##  $ :List of 16
+##   ..$ name      : chr "Grievous"
+##   ..$ height    : chr "216"
+##   ..$ mass      : chr "159"
+##   ..$ hair_color: chr "none"
+##   ..$ skin_color: chr "brown, white"
+##   ..$ eye_color : chr "green, yellow"
+##   ..$ birth_year: chr "unknown"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/59/"
+##   ..$ films     : chr "http://swapi.co/api/films/6/"
+##   ..$ species   : chr "http://swapi.co/api/species/36/"
+##   ..$ vehicles  : chr "http://swapi.co/api/vehicles/60/"
+##   ..$ starships : chr "http://swapi.co/api/starships/74/"
+##   ..$ created   : chr "2014-12-20T19:43:53.348000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.488000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/79/"
+##  $ :List of 14
+##   ..$ name      : chr "Tarfful"
+##   ..$ height    : chr "234"
+##   ..$ mass      : chr "136"
+##   ..$ hair_color: chr "brown"
+##   ..$ skin_color: chr "brown"
+##   ..$ eye_color : chr "blue"
+##   ..$ birth_year: chr "unknown"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/14/"
+##   ..$ films     : chr "http://swapi.co/api/films/6/"
+##   ..$ species   : chr "http://swapi.co/api/species/3/"
+##   ..$ created   : chr "2014-12-20T19:46:34.209000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.491000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/80/"
+##  $ :List of 14
+##   ..$ name      : chr "Raymus Antilles"
+##   ..$ height    : chr "188"
+##   ..$ mass      : chr "79"
+##   ..$ hair_color: chr "brown"
+##   ..$ skin_color: chr "light"
+##   ..$ eye_color : chr "brown"
+##   ..$ birth_year: chr "unknown"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/2/"
+##   ..$ films     : chr [1:2] "http://swapi.co/api/films/6/" "http://swapi.co/api/films/1/"
+##   ..$ species   : chr "http://swapi.co/api/species/1/"
+##   ..$ created   : chr "2014-12-20T19:49:35.583000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.493000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/81/"
+##  $ :List of 13
+##   ..$ name      : chr "Sly Moore"
+##   ..$ height    : chr "178"
+##   ..$ mass      : chr "48"
+##   ..$ hair_color: chr "none"
+##   ..$ skin_color: chr "pale"
+##   ..$ eye_color : chr "white"
+##   ..$ birth_year: chr "unknown"
+##   ..$ gender    : chr "female"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/60/"
+##   ..$ films     : chr [1:2] "http://swapi.co/api/films/5/" "http://swapi.co/api/films/6/"
+##   ..$ created   : chr "2014-12-20T20:18:37.619000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.496000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/82/"
+##  $ :List of 14
+##   ..$ name      : chr "Tion Medon"
+##   ..$ height    : chr "206"
+##   ..$ mass      : chr "80"
+##   ..$ hair_color: chr "none"
+##   ..$ skin_color: chr "grey"
+##   ..$ eye_color : chr "black"
+##   ..$ birth_year: chr "unknown"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/12/"
+##   ..$ films     : chr "http://swapi.co/api/films/6/"
+##   ..$ species   : chr "http://swapi.co/api/species/37/"
+##   ..$ created   : chr "2014-12-20T20:35:04.260000Z"
+##   ..$ edited    : chr "2014-12-20T21:17:50.498000Z"
+##   ..$ url       : chr "http://swapi.co/api/people/83/"
+##  $ :List of 14
+##   ..$ name      : chr "Finn"
+##   ..$ height    : chr "unknown"
+##   ..$ mass      : chr "unknown"
+##   ..$ hair_color: chr "black"
+##   ..$ skin_color: chr "dark"
+##   ..$ eye_color : chr "dark"
+##   ..$ birth_year: chr "unknown"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/28/"
+##   ..$ films     : chr "http://swapi.co/api/films/7/"
+##   ..$ species   : chr "http://swapi.co/api/species/1/"
+##   ..$ created   : chr "2015-04-17T06:52:40.793621Z"
+##   ..$ edited    : chr "2015-04-17T06:52:40.793674Z"
+##   ..$ url       : chr "http://swapi.co/api/people/84/"
+##  $ :List of 14
+##   ..$ name      : chr "Rey"
+##   ..$ height    : chr "unknown"
+##   ..$ mass      : chr "unknown"
+##   ..$ hair_color: chr "brown"
+##   ..$ skin_color: chr "light"
+##   ..$ eye_color : chr "hazel"
+##   ..$ birth_year: chr "unknown"
+##   ..$ gender    : chr "female"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/28/"
+##   ..$ films     : chr "http://swapi.co/api/films/7/"
+##   ..$ species   : chr "http://swapi.co/api/species/1/"
+##   ..$ created   : chr "2015-04-17T06:54:01.495077Z"
+##   ..$ edited    : chr "2015-04-17T06:54:01.495128Z"
+##   ..$ url       : chr "http://swapi.co/api/people/85/"
+##  $ :List of 15
+##   ..$ name      : chr "Poe Dameron"
+##   ..$ height    : chr "unknown"
+##   ..$ mass      : chr "unknown"
+##   ..$ hair_color: chr "brown"
+##   ..$ skin_color: chr "light"
+##   ..$ eye_color : chr "brown"
+##   ..$ birth_year: chr "unknown"
+##   ..$ gender    : chr "male"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/28/"
+##   ..$ films     : chr "http://swapi.co/api/films/7/"
+##   ..$ species   : chr "http://swapi.co/api/species/1/"
+##   ..$ starships : chr "http://swapi.co/api/starships/77/"
+##   ..$ created   : chr "2015-04-17T06:55:21.622786Z"
+##   ..$ edited    : chr "2015-04-17T06:55:21.622835Z"
+##   ..$ url       : chr "http://swapi.co/api/people/86/"
+##  $ :List of 14
+##   ..$ name      : chr "BB8"
+##   ..$ height    : chr "unknown"
+##   ..$ mass      : chr "unknown"
+##   ..$ hair_color: chr "none"
+##   ..$ skin_color: chr "none"
+##   ..$ eye_color : chr "black"
+##   ..$ birth_year: chr "unknown"
+##   ..$ gender    : chr "none"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/28/"
+##   ..$ films     : chr "http://swapi.co/api/films/7/"
+##   ..$ species   : chr "http://swapi.co/api/species/2/"
+##   ..$ created   : chr "2015-04-17T06:57:38.061346Z"
+##   ..$ edited    : chr "2015-04-17T06:57:38.061453Z"
+##   ..$ url       : chr "http://swapi.co/api/people/87/"
+##  $ :List of 13
+##   ..$ name      : chr "Captain Phasma"
+##   ..$ height    : chr "unknown"
+##   ..$ mass      : chr "unknown"
+##   ..$ hair_color: chr "unknown"
+##   ..$ skin_color: chr "unknown"
+##   ..$ eye_color : chr "unknown"
+##   ..$ birth_year: chr "unknown"
+##   ..$ gender    : chr "female"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/28/"
+##   ..$ films     : chr "http://swapi.co/api/films/7/"
+##   ..$ created   : chr "2015-10-13T10:35:39.229823Z"
+##   ..$ edited    : chr "2015-10-13T10:35:39.229894Z"
+##   ..$ url       : chr "http://swapi.co/api/people/88/"
+##  $ :List of 15
+##   ..$ name      : chr "Padmé Amidala"
+##   ..$ height    : chr "165"
+##   ..$ mass      : chr "45"
+##   ..$ hair_color: chr "brown"
+##   ..$ skin_color: chr "light"
+##   ..$ eye_color : chr "brown"
+##   ..$ birth_year: chr "46BBY"
+##   ..$ gender    : chr "female"
+##   ..$ homeworld : chr "http://swapi.co/api/planets/8/"
+##   ..$ films     : chr [1:3] "http://swapi.co/api/films/5/" "http://swapi.co/api/films/4/" "http://swapi.co/api/films/6/"
+##   ..$ species   : chr "http://swapi.co/api/species/1/"
+##   ..$ starships : chr [1:3] "http://swapi.co/api/starships/49/" "http://swapi.co/api/starships/64/" "http://swapi.co/api/starships/39/"
+##   ..$ created   : chr "2014-12-19T17:28:26.926000Z"
+##   ..$ edited    : chr "2016-04-20T17:06:31.502555Z"
+##   ..$ url       : chr "http://swapi.co/api/people/35/"
+```
+
+---
+
+## Tidy data from nested lists
+
+Recent versions of `tidyr` have added several functions that are designed to aide in the tidying of hierarchical data. Since they are part of `tidyr` all of the following functions work with data frames.
+
+From `tidyr`
+
+&gt; `hoist()`, `unnest_longer()`, and `unnest_wider()` provide tools for rectangling, collapsing deeply nested lists into regular columns.
+
+---
+
+## Unnesting
+
+
+```r
+(sw_df = tibble::tibble(
+  people = repurrrsive::sw_people
+))
+```
+
+```
+## # A tibble: 87 x 1
+##    people           
+##    &lt;list&gt;           
+##  1 &lt;named list [16]&gt;
+##  2 &lt;named list [14]&gt;
+##  3 &lt;named list [14]&gt;
+##  4 &lt;named list [15]&gt;
+##  5 &lt;named list [15]&gt;
+##  6 &lt;named list [14]&gt;
+##  7 &lt;named list [14]&gt;
+##  8 &lt;named list [14]&gt;
+##  9 &lt;named list [15]&gt;
+## 10 &lt;named list [16]&gt;
+## # … with 77 more rows
+```
+
+--
+
+
+```r
+unnest_wider(sw_df, people)
+```
+
+```
+## # A tibble: 87 x 16
+##    name  height mass  hair_color skin_color eye_color birth_year gender
+##    &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt; &lt;chr&gt;      &lt;chr&gt;      &lt;chr&gt;     &lt;chr&gt;      &lt;chr&gt; 
+##  1 Luke… 172    77    blond      fair       blue      19BBY      male  
+##  2 C-3PO 167    75    n/a        gold       yellow    112BBY     n/a   
+##  3 R2-D2 96     32    n/a        white, bl… red       33BBY      n/a   
+##  4 Dart… 202    136   none       white      yellow    41.9BBY    male  
+##  5 Leia… 150    49    brown      light      brown     19BBY      female
+##  6 Owen… 178    120   brown, gr… light      blue      52BBY      male  
+##  7 Beru… 165    75    brown      light      blue      47BBY      female
+##  8 R5-D4 97     32    n/a        white, red red       unknown    n/a   
+##  9 Bigg… 183    84    black      light      brown     24BBY      male  
+## 10 Obi-… 182    77    auburn, w… fair       blue-gray 57BBY      male  
+## # … with 77 more rows, and 8 more variables: homeworld &lt;chr&gt;, films &lt;list&gt;,
+## #   species &lt;chr&gt;, vehicles &lt;list&gt;, starships &lt;list&gt;, created &lt;chr&gt;,
+## #   edited &lt;chr&gt;, url &lt;chr&gt;
+```
+
+---
+
+## List columns
+
+
+```r
+unnest_wider(sw_df, people) %&gt;% 
+  select(name, starships)
+```
+
+```
+## # A tibble: 87 x 2
+##    name               starships
+##    &lt;chr&gt;              &lt;list&gt;   
+##  1 Luke Skywalker     &lt;chr [2]&gt;
+##  2 C-3PO              &lt;NULL&gt;   
+##  3 R2-D2              &lt;NULL&gt;   
+##  4 Darth Vader        &lt;chr [1]&gt;
+##  5 Leia Organa        &lt;NULL&gt;   
+##  6 Owen Lars          &lt;NULL&gt;   
+##  7 Beru Whitesun lars &lt;NULL&gt;   
+##  8 R5-D4              &lt;NULL&gt;   
+##  9 Biggs Darklighter  &lt;chr [1]&gt;
+## 10 Obi-Wan Kenobi     &lt;chr [5]&gt;
+## # … with 77 more rows
+```
+
+--
+
+
+```r
+unnest_wider(sw_df, people) %&gt;% 
+  select(name, starships) %&gt;%
+  pull(starships) %&gt;%
+  str()
+```
+
+```
+## List of 87
+##  $ : chr [1:2] "http://swapi.co/api/starships/12/" "http://swapi.co/api/starships/22/"
+##  $ : NULL
+##  $ : NULL
+##  $ : chr "http://swapi.co/api/starships/13/"
+##  $ : NULL
+##  $ : NULL
+##  $ : NULL
+##  $ : NULL
+##  $ : chr "http://swapi.co/api/starships/12/"
+##  $ : chr [1:5] "http://swapi.co/api/starships/48/" "http://swapi.co/api/starships/59/" "http://swapi.co/api/starships/64/" "http://swapi.co/api/starships/65/" ...
+##  $ : chr [1:3] "http://swapi.co/api/starships/59/" "http://swapi.co/api/starships/65/" "http://swapi.co/api/starships/39/"
+##  $ : NULL
+##  $ : chr [1:2] "http://swapi.co/api/starships/10/" "http://swapi.co/api/starships/22/"
+##  $ : chr [1:2] "http://swapi.co/api/starships/10/" "http://swapi.co/api/starships/22/"
+##  $ : NULL
+##  $ : NULL
+##  $ : chr "http://swapi.co/api/starships/12/"
+##  $ : chr "http://swapi.co/api/starships/12/"
+##  $ : NULL
+##  $ : NULL
+##  $ : chr "http://swapi.co/api/starships/21/"
+##  $ : NULL
+##  $ : NULL
+##  $ : chr "http://swapi.co/api/starships/10/"
+##  $ : NULL
+##  $ : NULL
+##  $ : NULL
+##  $ : chr "http://swapi.co/api/starships/28/"
+##  $ : NULL
+##  $ : chr "http://swapi.co/api/starships/10/"
+##  $ : NULL
+##  $ : NULL
+##  $ : NULL
+##  $ : NULL
+##  $ : NULL
+##  $ : NULL
+##  $ : chr "http://swapi.co/api/starships/40/"
+##  $ : NULL
+##  $ : NULL
+##  $ : NULL
+##  $ : NULL
+##  $ : chr "http://swapi.co/api/starships/41/"
+##  $ : NULL
+##  $ : NULL
+##  $ : NULL
+##  $ : NULL
+##  $ : NULL
+##  $ : NULL
+##  $ : NULL
+##  $ : NULL
+##  $ : NULL
+##  $ : NULL
+##  $ : NULL
+##  $ : NULL
+##  $ : chr "http://swapi.co/api/starships/48/"
+##  $ : NULL
+##  $ : chr "http://swapi.co/api/starships/39/"
+##  $ : NULL
+##  $ : NULL
+##  $ : NULL
+##  $ : NULL
+##  $ : NULL
+##  $ : NULL
+##  $ : NULL
+##  $ : NULL
+##  $ : NULL
+##  $ : NULL
+##  $ : NULL
+##  $ : NULL
+##  $ : NULL
+##  $ : NULL
+##  $ : NULL
+##  $ : NULL
+##  $ : NULL
+##  $ : NULL
+##  $ : NULL
+##  $ : chr "http://swapi.co/api/starships/74/"
+##  $ : NULL
+##  $ : NULL
+##  $ : NULL
+##  $ : NULL
+##  $ : NULL
+##  $ : NULL
+##  $ : chr "http://swapi.co/api/starships/77/"
+##  $ : NULL
+##  $ : NULL
+##  $ : chr [1:3] "http://swapi.co/api/starships/49/" "http://swapi.co/api/starships/64/" "http://swapi.co/api/starships/39/"
+```
+
+---
+
+## Unnest Longer
+
+
+```r
+unnest_wider(sw_df, people) %&gt;% 
+  select(name, starships) %&gt;%
+  unnest_longer(starships)
+```
+
+```
+## # A tibble: 98 x 2
+##    name               starships                        
+##    &lt;chr&gt;              &lt;chr&gt;                            
+##  1 Luke Skywalker     http://swapi.co/api/starships/12/
+##  2 Luke Skywalker     http://swapi.co/api/starships/22/
+##  3 C-3PO              &lt;NA&gt;                             
+##  4 R2-D2              &lt;NA&gt;                             
+##  5 Darth Vader        http://swapi.co/api/starships/13/
+##  6 Leia Organa        &lt;NA&gt;                             
+##  7 Owen Lars          &lt;NA&gt;                             
+##  8 Beru Whitesun lars &lt;NA&gt;                             
+##  9 R5-D4              &lt;NA&gt;                             
+## 10 Biggs Darklighter  http://swapi.co/api/starships/12/
+## # … with 88 more rows
+```
+
+---
+
+## Aside - sw_starships
+
+
+```r
+(ships = tibble(ships = repurrrsive::sw_starships) %&gt;%
+   unnest_wider(ships) %&gt;%
+   select(ship = name, url)
+)
+```
+
+```
+## # A tibble: 37 x 2
+##    ship                          url                              
+##    &lt;chr&gt;                         &lt;chr&gt;                            
+##  1 Sentinel-class landing craft  http://swapi.co/api/starships/5/ 
+##  2 Death Star                    http://swapi.co/api/starships/9/ 
+##  3 Millennium Falcon             http://swapi.co/api/starships/10/
+##  4 Y-wing                        http://swapi.co/api/starships/11/
+##  5 X-wing                        http://swapi.co/api/starships/12/
+##  6 TIE Advanced x1               http://swapi.co/api/starships/13/
+##  7 Executor                      http://swapi.co/api/starships/15/
+##  8 Slave 1                       http://swapi.co/api/starships/21/
+##  9 Imperial shuttle              http://swapi.co/api/starships/22/
+## 10 EF76 Nebulon-B escort frigate http://swapi.co/api/starships/23/
+## # … with 27 more rows
+```
+
+---
+
+## Joining 
+
+
+```r
+unnest_wider(sw_df, people) %&gt;% 
+  select(name, starships) %&gt;%
+  unnest_longer(starships) %&gt;%
+  left_join(ships, by = c("starships" = "url"))
+```
+
+```
+## # A tibble: 98 x 3
+##    name               starships                         ship            
+##    &lt;chr&gt;              &lt;chr&gt;                             &lt;chr&gt;           
+##  1 Luke Skywalker     http://swapi.co/api/starships/12/ X-wing          
+##  2 Luke Skywalker     http://swapi.co/api/starships/22/ Imperial shuttle
+##  3 C-3PO              &lt;NA&gt;                              &lt;NA&gt;            
+##  4 R2-D2              &lt;NA&gt;                              &lt;NA&gt;            
+##  5 Darth Vader        http://swapi.co/api/starships/13/ TIE Advanced x1 
+##  6 Leia Organa        &lt;NA&gt;                              &lt;NA&gt;            
+##  7 Owen Lars          &lt;NA&gt;                              &lt;NA&gt;            
+##  8 Beru Whitesun lars &lt;NA&gt;                              &lt;NA&gt;            
+##  9 R5-D4              &lt;NA&gt;                              &lt;NA&gt;            
+## 10 Biggs Darklighter  http://swapi.co/api/starships/12/ X-wing          
+## # … with 88 more rows
+```
+
+---
+
+## Joins in general
+
+.pull-left[
+&lt;img src="imgs/left-join-extra.gif" width="80%" style="display: block; margin: auto;" /&gt;
+]
+
+--
+
+.pull-right[
+&lt;img src="imgs/right-join.gif" width="80%" style="display: block; margin: auto;" /&gt;
+]
+
+.footnote[
+From [gadenbuie/tidyexplain](https://github.com/gadenbuie/tidyexplain)
+]
+
+---
+
+## Joins in general (2)
+
+.pull-left[
+&lt;img src="imgs/full-join.gif" width="80%" style="display: block; margin: auto;" /&gt;
+]
+
+--
+
+.pull-right[
+&lt;img src="imgs/inner-join.gif" width="80%" style="display: block; margin: auto;" /&gt;
+]
+
+.footnote[
+From [gadenbuie/tidyexplain](https://github.com/gadenbuie/tidyexplain)
+]
+
+
+---
+
+## Putting it together
+
+
+```r
+sw_df %&gt;%
+  unnest_wider(people) %&gt;% 
+  select(name, starships) %&gt;%
+  unnest_longer(starships) %&gt;%
+  inner_join(ships, by = c("starships" = "url")) %&gt;%
+  select(-starships) %&gt;%
+  group_by(name) %&gt;%
+  summarize(ships = list(ship), .groups = "drop")
+```
+
+```
+## # A tibble: 20 x 2
+##    name              ships    
+##    &lt;chr&gt;             &lt;list&gt;   
+##  1 Anakin Skywalker  &lt;chr [3]&gt;
+##  2 Arvel Crynyd      &lt;chr [1]&gt;
+##  3 Biggs Darklighter &lt;chr [1]&gt;
+##  4 Boba Fett         &lt;chr [1]&gt;
+##  5 Chewbacca         &lt;chr [2]&gt;
+##  6 Darth Maul        &lt;chr [1]&gt;
+##  7 Darth Vader       &lt;chr [1]&gt;
+##  8 Gregar Typho      &lt;chr [1]&gt;
+##  9 Grievous          &lt;chr [1]&gt;
+## 10 Han Solo          &lt;chr [2]&gt;
+## 11 Jek Tono Porkins  &lt;chr [1]&gt;
+## 12 Lando Calrissian  &lt;chr [1]&gt;
+## 13 Luke Skywalker    &lt;chr [2]&gt;
+## 14 Nien Nunb         &lt;chr [1]&gt;
+## 15 Obi-Wan Kenobi    &lt;chr [5]&gt;
+## 16 Padmé Amidala     &lt;chr [3]&gt;
+## 17 Plo Koon          &lt;chr [1]&gt;
+## 18 Poe Dameron       &lt;chr [1]&gt;
+## 19 Ric Olié          &lt;chr [1]&gt;
+## 20 Wedge Antilles    &lt;chr [1]&gt;
+```
+
+---
+
+
+```r
+sw_df %&gt;%
+  unnest_wider(people) %&gt;% 
+  select(name, starships) %&gt;%
+  unnest_longer(starships) %&gt;%
+  inner_join(ships, by = c("starships" = "url")) %&gt;%
+  select(-starships) %&gt;%
+  group_by(name) %&gt;%
+  summarize(ships = paste(ship, collapse = ", "), .groups = "drop")
+```
+
+```
+## # A tibble: 20 x 2
+##    name            ships                                                        
+##    &lt;chr&gt;           &lt;chr&gt;                                                        
+##  1 Anakin Skywalk… Trade Federation cruiser, Jedi Interceptor, Naboo fighter    
+##  2 Arvel Crynyd    A-wing                                                       
+##  3 Biggs Darkligh… X-wing                                                       
+##  4 Boba Fett       Slave 1                                                      
+##  5 Chewbacca       Millennium Falcon, Imperial shuttle                          
+##  6 Darth Maul      Scimitar                                                     
+##  7 Darth Vader     TIE Advanced x1                                              
+##  8 Gregar Typho    Naboo fighter                                                
+##  9 Grievous        Belbullab-22 starfighter                                     
+## 10 Han Solo        Millennium Falcon, Imperial shuttle                          
+## 11 Jek Tono Porki… X-wing                                                       
+## 12 Lando Calrissi… Millennium Falcon                                            
+## 13 Luke Skywalker  X-wing, Imperial shuttle                                     
+## 14 Nien Nunb       Millennium Falcon                                            
+## 15 Obi-Wan Kenobi  Jedi starfighter, Trade Federation cruiser, Naboo star skiff…
+## 16 Padmé Amidala   H-type Nubian yacht, Naboo star skiff, Naboo fighter         
+## 17 Plo Koon        Jedi starfighter                                             
+## 18 Poe Dameron     T-70 X-wing fighter                                          
+## 19 Ric Olié        Naboo Royal Starship                                         
+## 20 Wedge Antilles  X-wing
+```
+
+---
+class: center, middle
+
+# hoist
+
+---
+
+## Complex heirarchical data
+
+Often we may encounter complex data structures where our goal is not to rectangle every value (which may not even be possible) but rather to rectangle a small subset of the data.
+
+--
+
+
+```r
+str(repurrrsive::discog, max.level = 3)
+```
+
+```
+## List of 155
+##  $ :List of 5
+##   ..$ instance_id      : int 354823933
+##   ..$ date_added       : chr "2019-02-16T17:48:59-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2015
+##   .. ..$ master_url  : NULL
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 7496378
+##   .. ..$ thumb       : chr "https://img.discogs.com/vEVegHrMNTsP6xG_K6OuFXz4h_U=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Demo"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/EmbMh7vsElksjRgoXLFSuY1sjRQ=/fit-in/500x499/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/7496378"
+##   .. ..$ master_id   : int 0
+##   ..$ id               : int 7496378
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 354092601
+##   ..$ date_added       : chr "2019-02-13T14:13:11-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2013
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/553057"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 4490852
+##   .. ..$ thumb       : chr "https://img.discogs.com/nRZbcvVNygyNFKg5IjUd5YesF_c=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Observant Com El Mon Es Destrueix"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/eBbQ9jaiHKFeSXLwBEbxq6nl8Wo=/fit-in/600x600/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/4490852"
+##   .. ..$ master_id   : int 553057
+##   ..$ id               : int 4490852
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 354091476
+##   ..$ date_added       : chr "2019-02-13T14:07:23-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2017
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/1109943"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 9827276
+##   .. ..$ thumb       : chr "https://img.discogs.com/x6GUri3hXAcfzF2wz5jQloomOoY=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "I"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/7aJPlo2phtFL-T2Kt6MTBc0uftY=/fit-in/600x600/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/9827276"
+##   .. ..$ master_id   : int 1109943
+##   ..$ id               : int 9827276
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 351244906
+##   ..$ date_added       : chr "2019-02-02T11:39:58-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 3
+##   .. ..$ year        : int 2017
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/1128934"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 9769203
+##   .. ..$ thumb       : chr "https://img.discogs.com/eHz44JyqS_3lVHwmB7SiYsmaFgw=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Oído Absoluto"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/gS7kZaQLa4PaOtLizmpdKOClSo8=/fit-in/600x600/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/9769203"
+##   .. ..$ master_id   : int 1128934
+##   ..$ id               : int 9769203
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 351244801
+##   ..$ date_added       : chr "2019-02-02T11:39:37-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2015
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/857592"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 7237138
+##   .. ..$ thumb       : chr "https://img.discogs.com/dqDk2TN2jkMZKFya71998oTRGcI=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "A Cat's Cause, No Dogs Problem"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/qXfi2e4YuS90_abWt0Tt-hsCHSQ=/fit-in/600x600/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/7237138"
+##   .. ..$ master_id   : int 857592
+##   ..$ id               : int 7237138
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 351052065
+##   ..$ date_added       : chr "2019-02-01T20:40:53-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2019
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/1498137"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 13117042
+##   .. ..$ thumb       : chr "https://img.discogs.com/ahomwZjjZ5-l730LYIsJp3BikX4=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Tashme"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/LRDyHX3PR-m6gBt67pJ7JbdFB6M=/fit-in/600x600/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/13117042"
+##   .. ..$ master_id   : int 1498137
+##   ..$ id               : int 13117042
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350315345
+##   ..$ date_added       : chr "2019-01-29T15:48:37-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2014
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/852880"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 7113575
+##   .. ..$ thumb       : chr "https://img.discogs.com/Uo5drP3W-Fje5fPnS1te9J1hEcY=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Demo"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/xTk-opTWRxEvsZB4eWppEBAatPM=/fit-in/600x906/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/7113575"
+##   .. ..$ master_id   : int 852880
+##   ..$ id               : int 7113575
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350315103
+##   ..$ date_added       : chr "2019-01-29T15:47:22-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2015
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/869410"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 10540713
+##   .. ..$ thumb       : chr "https://img.discogs.com/4sniB6eUWvwb6DdUMiHhbGRs6P8=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Let The Miracles Begin"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/UareU8W932i1M9SWi78mU5nxHp8=/fit-in/422x676/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/10540713"
+##   .. ..$ master_id   : int 869410
+##   ..$ id               : int 10540713
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350314507
+##   ..$ date_added       : chr "2019-01-29T15:44:08-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2017
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/1281224"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 11260950
+##   .. ..$ thumb       : chr ""
+##   .. ..$ title       : chr "Sub Space"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/720182381cfb1a9425d9b33c5e2bd091040f9ebd/images/spacer.gif"
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/11260950"
+##   .. ..$ master_id   : int 1281224
+##   ..$ id               : int 11260950
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350314047
+##   ..$ date_added       : chr "2019-01-29T15:41:35-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2017
+##   .. ..$ master_url  : NULL
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 11726853
+##   .. ..$ thumb       : chr "https://img.discogs.com/Ab5W0qBKR9o85x4X00_bTCyQ_zU=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Demo"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/jYo5eqe_CE-oCzw2kk9YxAE3vIY=/fit-in/600x593/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/11726853"
+##   .. ..$ master_id   : int 0
+##   ..$ id               : int 11726853
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350313874
+##   ..$ date_added       : chr "2019-01-29T15:40:31-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2015
+##   .. ..$ master_url  : NULL
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 12025267
+##   .. ..$ thumb       : chr "https://img.discogs.com/HeAHFNXClJGzTy9cGAYWj3cuvLw=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Pines"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/Eur8siPTHzxxPRFENhqsxNMajII=/fit-in/600x561/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/12025267"
+##   .. ..$ master_id   : int 0
+##   ..$ id               : int 12025267
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350313508
+##   ..$ date_added       : chr "2019-01-29T15:38:14-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2016
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/972644"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 8252472
+##   .. ..$ thumb       : chr "https://img.discogs.com/2B-rz9aBXELHJlu0su874sYMnHs=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Domo"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/RcScS9-uMiV-SLdtwg__0f6QIM4=/fit-in/561x561/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/8252472"
+##   .. ..$ master_id   : int 972644
+##   ..$ id               : int 8252472
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350313380
+##   ..$ date_added       : chr "2019-01-29T15:37:40-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2017
+##   .. ..$ master_url  : NULL
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 9667355
+##   .. ..$ thumb       : chr "https://img.discogs.com/sXDSrClHFro2u2A9TFYh7dPdS5U=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Eat Snot &amp; Rot!"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/pAwNmFILIbXb5t0r7NpSBzhbp4s=/fit-in/600x946/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/9667355"
+##   .. ..$ master_id   : int 0
+##   ..$ id               : int 9667355
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350313358
+##   ..$ date_added       : chr "2019-01-29T15:37:31-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2015
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/927900"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 7847097
+##   .. ..$ thumb       : chr "https://img.discogs.com/ZmYxOj_4c6atRVxfDZZJBL4_pok=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "American Hate's Greatest Hits"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/Izl88DFAtfkQrVkcIZya36M937A=/fit-in/600x785/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/7847097"
+##   .. ..$ master_id   : int 927900
+##   ..$ id               : int 7847097
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350313270
+##   ..$ date_added       : chr "2019-01-29T15:36:59-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2017
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/1185520"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 10347810
+##   .. ..$ thumb       : chr "https://img.discogs.com/qpOOs5kwsYaR7AS9D24y_ur6z98=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Relaxed Mike"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/EQkBb0dZMkU6EBbSoc7lq6l2uZc=/fit-in/600x575/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/10347810"
+##   .. ..$ master_id   : int 1185520
+##   ..$ id               : int 10347810
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350313246
+##   ..$ date_added       : chr "2019-01-29T15:36:50-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2015
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/975745"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 7949818
+##   .. ..$ thumb       : chr "https://img.discogs.com/PgWN047_t1ZKmFSIO9E1LKYJXL4=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Demo"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/tcLFSKTHu76N2kbj8ev9OuMSbyg=/fit-in/600x940/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/7949818"
+##   .. ..$ master_id   : int 975745
+##   ..$ id               : int 7949818
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350313107
+##   ..$ date_added       : chr "2019-01-29T15:36:07-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2018
+##   .. ..$ master_url  : NULL
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 12075374
+##   .. ..$ thumb       : chr "https://img.discogs.com/ctCFeQCg9iGSjzMyNAwEEMWyz0c=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Demo Hits"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/bg41i6neeMAQKPeJL3HRL2FLkMI=/fit-in/600x600/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/12075374"
+##   .. ..$ master_id   : int 0
+##   ..$ id               : int 12075374
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350312972
+##   ..$ date_added       : chr "2019-01-29T15:35:18-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2016
+##   .. ..$ master_url  : NULL
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 8137815
+##   .. ..$ thumb       : chr "https://img.discogs.com/rPFC0Cu08ePV7WB_J7YST-0Iu7A=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Demo 2015"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/XCPe9-M1rfr3McopwcPgo1uCzg0=/fit-in/600x658/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/8137815"
+##   .. ..$ master_id   : int 0
+##   ..$ id               : int 8137815
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350312935
+##   ..$ date_added       : chr "2019-01-29T15:35:01-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2016
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/988589"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 8926338
+##   .. ..$ thumb       : chr "https://img.discogs.com/SlPflmPxaiaoGkmJ2j81wcski-A=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Demo"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/Ed3iaeyaFkNlqgn64oKjBHJD9zI=/fit-in/600x899/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/8926338"
+##   .. ..$ master_id   : int 988589
+##   ..$ id               : int 8926338
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350312850
+##   ..$ date_added       : chr "2019-01-29T15:34:32-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2017
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/1185733"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 10350103
+##   .. ..$ thumb       : chr "https://img.discogs.com/CsYPOAFhQh7m3Me55UdBuBKHDRI=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "War Hymns"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/oBer3XMs4uiy7AlQIL5QNkK40qE=/fit-in/600x900/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/10350103"
+##   .. ..$ master_id   : int 1185733
+##   ..$ id               : int 10350103
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350312790
+##   ..$ date_added       : chr "2019-01-29T15:34:15-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2015
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/870005"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 6829789
+##   .. ..$ thumb       : chr "https://img.discogs.com/BI1nKj_LntK9a44TYX9OEUNCzTQ=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Girls Living Outside Society's Shit"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/EI7BNCs1JjMZtvl4glXjNKSaaxI=/fit-in/400x602/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/6829789"
+##   .. ..$ master_id   : int 870005
+##   ..$ id               : int 6829789
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350312727
+##   ..$ date_added       : chr "2019-01-29T15:33:45-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2015
+##   .. ..$ master_url  : NULL
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 7454861
+##   .. ..$ thumb       : chr "https://img.discogs.com/cCBP6gRETNHd3hS8XTGH0uGVPmQ=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "It Gets Weirder - A Compilation Of Olympia Punk In 2015"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/D74xa0DCRzZCeFX9lKl5sWyVeh4=/fit-in/600x600/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/7454861"
+##   .. ..$ master_id   : int 0
+##   ..$ id               : int 7454861
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350312693
+##   ..$ date_added       : chr "2019-01-29T15:33:32-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2015
+##   .. ..$ master_url  : NULL
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 7441672
+##   .. ..$ thumb       : chr "https://img.discogs.com/y_FDPVg_XNnlFCF56XtIK2Z8Sck=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Fight b/w We Live"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/pnLoN2wbDMIe0y2TuAgVWVwENwA=/fit-in/512x781/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/7441672"
+##   .. ..$ master_id   : int 0
+##   ..$ id               : int 7441672
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350312544
+##   ..$ date_added       : chr "2019-01-29T15:32:31-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2015
+##   .. ..$ master_url  : NULL
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 7339234
+##   .. ..$ thumb       : chr "https://img.discogs.com/FmHUgR29I7demE8NnqchB8vpqQw=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Petite Dog "
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/TlTRV6w_WZn8R_z9qa5hwTKlMVE=/fit-in/600x930/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/7339234"
+##   .. ..$ master_id   : int 0
+##   ..$ id               : int 7339234
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350312482
+##   ..$ date_added       : chr "2019-01-29T15:32:07-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2016
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/973090"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 8242408
+##   .. ..$ thumb       : chr "https://img.discogs.com/zUWlGKwAISM15E67MYXrSGtTlZ8=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Hard Grip"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/mFjo0m2SdfWAXPNEPF3bS_mniks=/fit-in/600x600/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/8242408"
+##   .. ..$ master_id   : int 973090
+##   ..$ id               : int 8242408
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350312433
+##   ..$ date_added       : chr "2019-01-29T15:31:50-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2015
+##   .. ..$ master_url  : NULL
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 9477305
+##   .. ..$ thumb       : chr "https://img.discogs.com/pplNVLAi4BdnTyH_KyqioaU5BU0=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Fleshed Out"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/gYa9LfE98zr4RD8aYb8JUByE8Sg=/fit-in/600x951/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/9477305"
+##   .. ..$ master_id   : int 0
+##   ..$ id               : int 9477305
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350312397
+##   ..$ date_added       : chr "2019-01-29T15:31:40-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2014
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/709327"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 5888591
+##   .. ..$ thumb       : chr "https://img.discogs.com/MOkawTfX_Muu9iXvvj6ww-rBVZA=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Vexx"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/XwqtdBO478L8LPw2494DQv5STeg=/fit-in/600x940/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/5888591"
+##   .. ..$ master_id   : int 709327
+##   ..$ id               : int 5888591
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350312359
+##   ..$ date_added       : chr "2019-01-29T15:31:26-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2012
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/597843"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 4812535
+##   .. ..$ thumb       : chr "https://img.discogs.com/VYKuwrQujJhLN1ao91xN2cPTkGs=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "All's Lost"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/35O-z0OZpqeuaY0i_v1flmH_4B0=/fit-in/600x984/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/4812535"
+##   .. ..$ master_id   : int 597843
+##   ..$ id               : int 4812535
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350312327
+##   ..$ date_added       : chr "2019-01-29T15:31:15-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2015
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/888704"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 7506665
+##   .. ..$ thumb       : chr "https://img.discogs.com/IeegHvvzLhTXjN5VkYIgoY8EypY=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Wash Away"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/rPNwCNqamcXoPtPtACC6Ijsbd58=/fit-in/600x600/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/7506665"
+##   .. ..$ master_id   : int 888704
+##   ..$ id               : int 7506665
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350312246
+##   ..$ date_added       : chr "2019-01-29T15:30:46-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2013
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/549235"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 4234761
+##   .. ..$ thumb       : chr "https://img.discogs.com/T6Xh50YzlWgQJvo48Y2v7kYuR6E=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Unbecoming"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/9s-QukKNdsLI7CipkqK9qg8kWx0=/fit-in/600x450/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/4234761"
+##   .. ..$ master_id   : int 549235
+##   ..$ id               : int 4234761
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350312211
+##   ..$ date_added       : chr "2019-01-29T15:30:30-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2014
+##   .. ..$ master_url  : NULL
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 5922737
+##   .. ..$ thumb       : chr "https://img.discogs.com/tsv4wfrhjllmZeGkXIaLzYHEyj4=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "My New Flesh"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/BLqjvqOhsbKzyvumdcWYiZdBOu8=/fit-in/600x1021/filters:strip_icc():format(jpeg):mode_rgb("| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/5922737"
+##   .. ..$ master_id   : int 0
+##   ..$ id               : int 5922737
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350312055
+##   ..$ date_added       : chr "2019-01-29T15:29:35-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2016
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/987107"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 8767499
+##   .. ..$ thumb       : chr "https://img.discogs.com/eDCu4vwrRD7ZeMjpcwTLpLYl5bc=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Demo 2016"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/AHQNzXH8al81WEvrK1yVPcQzBU4=/fit-in/600x600/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/8767499"
+##   .. ..$ master_id   : int 987107
+##   ..$ id               : int 8767499
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350311880
+##   ..$ date_added       : chr "2019-01-29T15:28:28-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2017
+##   .. ..$ master_url  : NULL
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 11011789
+##   .. ..$ thumb       : chr "https://img.discogs.com/XPWPgUPsT-h1mxxn_EQk0EH1_Pc=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Promotional Heat"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/JAN-Iuk7HtTo4sMwiYekx7vVNs8=/fit-in/487x472/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/11011789"
+##   .. ..$ master_id   : int 0
+##   ..$ id               : int 11011789
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350311734
+##   ..$ date_added       : chr "2019-01-29T15:27:35-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2016
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/1095386"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 9408223
+##   .. ..$ thumb       : chr "https://img.discogs.com/GykF5j5iDBhRmHM3aOX6MK453cg=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Ingrate"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/EcDCseXUXd0Pe1F4XP8yV4b-Pj8=/fit-in/600x590/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/9408223"
+##   .. ..$ master_id   : int 1095386
+##   ..$ id               : int 9408223
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350311710
+##   ..$ date_added       : chr "2019-01-29T15:27:23-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2017
+##   .. ..$ master_url  : NULL
+##   .. ..$ artists     :List of 7
+##   .. ..$ id          : int 11799478
+##   .. ..$ thumb       : chr "https://img.discogs.com/VqSUXagFJKYzvHpFpj9JLMbCh6w=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Dog City USA"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/4bSWGE76bce7PKupqmHrN64aqkg=/fit-in/600x600/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/11799478"
+##   .. ..$ master_id   : int 0
+##   ..$ id               : int 11799478
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350311667
+##   ..$ date_added       : chr "2019-01-29T15:27:07-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2017
+##   .. ..$ master_url  : NULL
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 11967088
+##   .. ..$ thumb       : chr "https://img.discogs.com/cq50cG9gqXkiUicDig_fBlrS8Hc=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Tethered In Deviancy"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/khQ34r3xwLRCb09ltNC8dd6K4V8=/fit-in/600x658/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/11967088"
+##   .. ..$ master_id   : int 0
+##   ..$ id               : int 11967088
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350311623
+##   ..$ date_added       : chr "2019-01-29T15:26:51-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2016
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/998214"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 8439750
+##   .. ..$ thumb       : chr "https://img.discogs.com/1U73zfzKfxAj2IOTruNCJRkEOhE=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Cassette"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/c5-b1pXJLBH4c_pOwZcttmUj55c=/fit-in/600x587/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/8439750"
+##   .. ..$ master_id   : int 998214
+##   ..$ id               : int 8439750
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350311495
+##   ..$ date_added       : chr "2019-01-29T15:26:15-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2014
+##   .. ..$ master_url  : NULL
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 6809387
+##   .. ..$ thumb       : chr "https://img.discogs.com/-P6T70U2h74KDIjsFghnAFmOymk=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Demo 2014"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/p2qBgs8aHGRldHnz3z3L1XTkkBs=/fit-in/600x587/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/6809387"
+##   .. ..$ master_id   : int 0
+##   ..$ id               : int 6809387
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350311439
+##   ..$ date_added       : chr "2019-01-29T15:25:55-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2016
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/1148670"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 8923752
+##   .. ..$ thumb       : chr "https://img.discogs.com/oQy7VjfHjstx3GsAC0AHl2w6a4s=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Demo 2016"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/kPm8plQaO6KMEcjq9SDmCQ-7PkU=/fit-in/600x600/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/8923752"
+##   .. ..$ master_id   : int 1148670
+##   ..$ id               : int 8923752
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350311342
+##   ..$ date_added       : chr "2019-01-29T15:25:19-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2017
+##   .. ..$ master_url  : NULL
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 10347774
+##   .. ..$ thumb       : chr "https://img.discogs.com/memVYk8MLwRLV54-AuHGbEymR7o=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Compilation"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/2_gCqSCsSfs1aRf7WnBYQG2pQvQ=/fit-in/600x593/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/10347774"
+##   .. ..$ master_id   : int 0
+##   ..$ id               : int 10347774
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350311266
+##   ..$ date_added       : chr "2019-01-29T15:24:49-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2017
+##   .. ..$ master_url  : NULL
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 10631734
+##   .. ..$ thumb       : chr "https://img.discogs.com/7csTCzdEPxmz3sAcc90_sPdN7gM=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Intimate Justice"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/Fpc9BGgCp7vRFr9yFwdM0WQbkXM=/fit-in/500x446/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/10631734"
+##   .. ..$ master_id   : int 0
+##   ..$ id               : int 10631734
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350311151
+##   ..$ date_added       : chr "2019-01-29T15:24:14-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2016
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/1498273"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 9441156
+##   .. ..$ thumb       : chr "https://img.discogs.com/FlVdODn3b52lqCDk0oGKkuPZiqs=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Demo II"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/XytzS7COrJiCBsZJAzTqaB0_z0M=/fit-in/477x475/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/9441156"
+##   .. ..$ master_id   : int 1498273
+##   ..$ id               : int 9441156
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350311121
+##   ..$ date_added       : chr "2019-01-29T15:24:06-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2017
+##   .. ..$ master_url  : NULL
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 11011923
+##   .. ..$ thumb       : chr "https://img.discogs.com/Gl_QTRUjdvYOYvPOAZDfD8GTqKI=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Promo"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/Wk-NXjGo74Vss_7EhXym9KqkYHI=/fit-in/600x600/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/11011923"
+##   .. ..$ master_id   : int 0
+##   ..$ id               : int 11011923
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350311072
+##   ..$ date_added       : chr "2019-01-29T15:23:52-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2017
+##   .. ..$ master_url  : NULL
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 10635731
+##   .. ..$ thumb       : chr "https://img.discogs.com/IDHqgHpecYp8hRmgPFqgtrPM680=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Sink With You"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/CmDAW0JmLgXhSahYVkF-ZBCWHDM=/fit-in/600x600/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/10635731"
+##   .. ..$ master_id   : int 0
+##   ..$ id               : int 10635731
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350311038
+##   ..$ date_added       : chr "2019-01-29T15:23:41-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2013
+##   .. ..$ master_url  : NULL
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 5383038
+##   .. ..$ thumb       : chr "https://img.discogs.com/F8ZhL5AjuSchjF7s9mLUFDrHBek=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "For Men"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/4SOX4n0BwxUFt0f-D2Pf-6WJySk=/fit-in/500x477/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/5383038"
+##   .. ..$ master_id   : int 0
+##   ..$ id               : int 5383038
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350310921
+##   ..$ date_added       : chr "2019-01-29T15:23:04-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2017
+##   .. ..$ master_url  : NULL
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 11321550
+##   .. ..$ thumb       : chr "https://img.discogs.com/rum9wvxbEu9q4bMJzMHSRLxBgao=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Una Tarde De Hueveo"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/qoc0ULIMQvMSahMHjv8xbqQPvlA=/fit-in/600x584/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/11321550"
+##   .. ..$ master_id   : int 0
+##   ..$ id               : int 11321550
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350310864
+##   ..$ date_added       : chr "2019-01-29T15:22:43-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 0
+##   .. ..$ master_url  : NULL
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 11086084
+##   .. ..$ thumb       : chr ""
+##   .. ..$ title       : chr "Dolori"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/720182381cfb1a9425d9b33c5e2bd091040f9ebd/images/spacer.gif"
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/11086084"
+##   .. ..$ master_id   : int 0
+##   ..$ id               : int 11086084
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350310812
+##   ..$ date_added       : chr "2019-01-29T15:22:32-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2014
+##   .. ..$ master_url  : NULL
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 6896138
+##   .. ..$ thumb       : chr "https://img.discogs.com/SaEQKxz3Lga09ieqRG_r3c3_k0s=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Demo 2014"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/WmJQ8pfGfToGyNGtfk0pxEzpSGc=/fit-in/600x374/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/6896138"
+##   .. ..$ master_id   : int 0
+##   ..$ id               : int 6896138
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350310410
+##   ..$ date_added       : chr "2019-01-29T15:20:15-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2015
+##   .. ..$ master_url  : NULL
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 8630472
+##   .. ..$ thumb       : chr "https://img.discogs.com/jO8Q-12GMtTwfBJEAS1i-XMT6ks=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Concept Model(s) I-V"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/LCKXaC65kUDnOSbT9YH9zH3bWEU=/fit-in/600x915/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/8630472"
+##   .. ..$ master_id   : int 0
+##   ..$ id               : int 8630472
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350310247
+##   ..$ date_added       : chr "2019-01-29T15:19:21-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2015
+##   .. ..$ master_url  : NULL
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 7587650
+##   .. ..$ thumb       : chr "https://img.discogs.com/XMp5csrlMPZRrKj5Vn0YO48uN9E=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Demo"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/-erNWdx1_BakrZcLAasbY61CtZw=/fit-in/600x600/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/7587650"
+##   .. ..$ master_id   : int 0
+##   ..$ id               : int 7587650
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350309979
+##   ..$ date_added       : chr "2019-01-29T15:17:31-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2016
+##   .. ..$ master_url  : NULL
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 8414924
+##   .. ..$ thumb       : chr "https://img.discogs.com/spfdRZ6QPAa4lXLHErIjf5U3Paw=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Prisoner of the World"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/TmanCUNaML6SZayL5FhSd7ogFNI=/fit-in/600x800/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/8414924"
+##   .. ..$ master_id   : int 0
+##   ..$ id               : int 8414924
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350309892
+##   ..$ date_added       : chr "2019-01-29T15:16:58-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2016
+##   .. ..$ master_url  : NULL
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 11992539
+##   .. ..$ thumb       : chr "https://img.discogs.com/En9f2UGPuoRuqSUUYWLlAXi78PA=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "DOXX"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/8xextJieIBTF2CsYSPAIKO4Fzdc=/fit-in/600x800/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/11992539"
+##   .. ..$ master_id   : int 0
+##   ..$ id               : int 11992539
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350309855
+##   ..$ date_added       : chr "2019-01-29T15:16:41-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2016
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/1013570"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 8563279
+##   .. ..$ thumb       : chr "https://img.discogs.com/TA-T-H4pOpqtvGUnDzUgHjFUGzk=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Room 44 Sessions"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/BzFHHKoxwWishupi2EPrrDR-Bqg=/fit-in/600x558/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/8563279"
+##   .. ..$ master_id   : int 1013570
+##   ..$ id               : int 8563279
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350309777
+##   ..$ date_added       : chr "2019-01-29T15:16:12-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2015
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/882570"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 7449616
+##   .. ..$ thumb       : chr "https://img.discogs.com/-RxAeHMXOOcKDWi7KMBr-ra2icM=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "What's Buggin' You?"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/2nzB1UdPG-84-1uU0g2fYbAgJ_A=/fit-in/600x900/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/7449616"
+##   .. ..$ master_id   : int 882570
+##   ..$ id               : int 7449616
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350309616
+##   ..$ date_added       : chr "2019-01-29T15:15:15-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2017
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/1183639"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 10329430
+##   .. ..$ thumb       : chr "https://img.discogs.com/DBGrwpTuFXjDaIavqAlUGk17q10=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Cowboy Slumber Party"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/sotU4dK8zhwyjRI99PCwcj9aR6c=/fit-in/600x600/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/10329430"
+##   .. ..$ master_id   : int 1183639
+##   ..$ id               : int 10329430
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350309557
+##   ..$ date_added       : chr "2019-01-29T15:14:56-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2015
+##   .. ..$ master_url  : NULL
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 8948154
+##   .. ..$ thumb       : chr "https://img.discogs.com/cdCf_jO1yziTjGSoQR54R4pVclY=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "UCLA Yankee Cola"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/nT_jt0tBpIqV4dKyN-GtqsG9Gf0=/fit-in/600x591/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/8948154"
+##   .. ..$ master_id   : int 0
+##   ..$ id               : int 8948154
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350309514
+##   ..$ date_added       : chr "2019-01-29T15:14:43-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2015
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/972643"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 8252512
+##   .. ..$ thumb       : chr "https://img.discogs.com/mpUWG0ab9Bx_mEokx2ptk4r7ke8=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Modern Life"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/8PNGYEi3sYrzj2SEbRz3yuatfyw=/fit-in/600x450/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/8252512"
+##   .. ..$ master_id   : int 972643
+##   ..$ id               : int 8252512
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350309481
+##   ..$ date_added       : chr "2019-01-29T15:14:27-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2015
+##   .. ..$ master_url  : NULL
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 7053100
+##   .. ..$ thumb       : chr "https://img.discogs.com/PtpeL_xKiB4E_87KTor9lsCp-iE=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Neurosis Party"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/Zxw5z6-TufA6rSHfx4Z3wTUJ_98=/fit-in/500x778/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/7053100"
+##   .. ..$ master_id   : int 0
+##   ..$ id               : int 7053100
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350309452
+##   ..$ date_added       : chr "2019-01-29T15:14:17-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2015
+##   .. ..$ master_url  : NULL
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 11514667
+##   .. ..$ thumb       : chr "https://img.discogs.com/GC1WjMUDvQtf1OZNS11kY2SS2zQ=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Anarchy And Chaos Tour 2015 Tape"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/MxVwUl9mwZINuzVfi5BECmIHlxI=/fit-in/163x262/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/11514667"
+##   .. ..$ master_id   : int 0
+##   ..$ id               : int 11514667
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350309380
+##   ..$ date_added       : chr "2019-01-29T15:13:50-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2014
+##   .. ..$ master_url  : NULL
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 6022854
+##   .. ..$ thumb       : chr "https://img.discogs.com/E63R0NORpFzwjGXAiweuXLZRCk8=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Time Slips Away"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/GIj8zr281SEHqZh7fbLOCIJKtXE=/fit-in/600x600/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/6022854"
+##   .. ..$ master_id   : int 0
+##   ..$ id               : int 6022854
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350309284
+##   ..$ date_added       : chr "2019-01-29T15:13:15-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2015
+##   .. ..$ master_url  : NULL
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 7018322
+##   .. ..$ thumb       : chr "https://img.discogs.com/Tsycm-ui_1_40yGQjKDJ3JuvF8o=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Domestication"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/nhrAiiqmnALsi9yIXBfdPPM7XSQ=/fit-in/600x600/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/7018322"
+##   .. ..$ master_id   : int 0
+##   ..$ id               : int 7018322
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350309242
+##   ..$ date_added       : chr "2019-01-29T15:12:58-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 2
+##   .. ..$ year        : int 0
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/43057"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 8988805
+##   .. ..$ thumb       : chr "https://img.discogs.com/jMO0EgBkyZAacUAPR0qpM2DMpWA=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "In Your Face"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/7JL-vFUnGG5PRSD1H-BioyN0se8=/fit-in/600x958/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/8988805"
+##   .. ..$ master_id   : int 43057
+##   ..$ id               : int 8988805
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350309162
+##   ..$ date_added       : chr "2019-01-29T15:12:32-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2016
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/1003205"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 8527216
+##   .. ..$ thumb       : chr "https://img.discogs.com/O7CCuQgPduDKTAs7qMVJnUMc6nU=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "II"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/IkWd_PgKPkCBmLvCDwVIf_xxYO0=/fit-in/267x423/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/8527216"
+##   .. ..$ master_id   : int 1003205
+##   ..$ id               : int 8527216
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350309100
+##   ..$ date_added       : chr "2019-01-29T15:12:13-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2017
+##   .. ..$ master_url  : NULL
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 10529440
+##   .. ..$ thumb       : chr "https://img.discogs.com/1HZA-6yxAqaCpByDhe8BqRcnDs8=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Demo 2017"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/TP1p9TyWSZOhOGNNlr5roS9ykuM=/fit-in/454x444/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/10529440"
+##   .. ..$ master_id   : int 0
+##   ..$ id               : int 10529440
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350308724
+##   ..$ date_added       : chr "2019-01-29T15:10:02-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2016
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/1096880"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 8886453
+##   .. ..$ thumb       : chr "https://img.discogs.com/HugnDTglQEMCNQlGK9Jx_7YeVno=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Promo Tape 2016"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/3zX4LlfJhviC34SDEP4ew0XRLiE=/fit-in/600x932/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/8886453"
+##   .. ..$ master_id   : int 1096880
+##   ..$ id               : int 8886453
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350308425
+##   ..$ date_added       : chr "2019-01-29T15:08:31-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 2
+##   .. ..$ year        : int 2009
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/39365"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 1875606
+##   .. ..$ thumb       : chr "https://img.discogs.com/wr2htlm8Dw09nwql4ryjrs5ikdo=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Talking Heads: 77"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/7kgX0m56a1lPYPR302Dw3kyL7_A=/fit-in/500x484/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/1875606"
+##   .. ..$ master_id   : int 39365
+##   ..$ id               : int 1875606
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350298652
+##   ..$ date_added       : chr "2019-01-29T14:21:25-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 0
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/5948"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 243919
+##   .. ..$ thumb       : chr "https://img.discogs.com/lfzH4i1BAEGaG0PnCvkLD1Xbcb0=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Loveless"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/DCbGU9BAoU3ZJ5zDRqLW09dKeYE=/fit-in/600x600/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/243919"
+##   .. ..$ master_id   : int 5948
+##   ..$ id               : int 243919
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350297946
+##   ..$ date_added       : chr "2019-01-29T14:17:58-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 1986
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/115334"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 1615418
+##   .. ..$ thumb       : chr "https://img.discogs.com/fbNng6Hy_SAxhQskrusDXkGmiEs=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Hip To Be Square"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/Il_qisuI2ivkGVzXYAaPBYkJ5zM=/fit-in/296x300/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/1615418"
+##   .. ..$ master_id   : int 115334
+##   ..$ id               : int 1615418
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350297816
+##   ..$ date_added       : chr "2019-01-29T14:17:17-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 2
+##   .. ..$ year        : int 2013
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/5939"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 5174921
+##   .. ..$ thumb       : chr "https://img.discogs.com/jcDPS91LqPKYXNaCPkPg-JnLvNI=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Isn't Anything"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/A-1D7fq4_dPkk8aS2zDjK6QSpas=/fit-in/600x600/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/5174921"
+##   .. ..$ master_id   : int 5939
+##   ..$ id               : int 5174921
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350297664
+##   ..$ date_added       : chr "2019-01-29T14:16:36-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2012
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/510739"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 3868107
+##   .. ..$ thumb       : chr "https://img.discogs.com/HuSVWUCWaHWPjo3SNkMjls0ADk8=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "The Feeling"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/xrGdosgzR2tUDNlAd4Bkf5tqQBQ=/fit-in/600x600/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/3868107"
+##   .. ..$ master_id   : int 510739
+##   ..$ id               : int 3868107
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350297343
+##   ..$ date_added       : chr "2019-01-29T14:15:09-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 2
+##   .. ..$ year        : int 0
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/4264"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 10081218
+##   .. ..$ thumb       : chr "https://img.discogs.com/0n27YuwUmazCS3A73nUqje5WqF0=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "The Smiths"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/RFqpUeeLtCDc5ZhymlBgg5srDHg=/fit-in/600x597/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/10081218"
+##   .. ..$ master_id   : int 4264
+##   ..$ id               : int 10081218
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350296604
+##   ..$ date_added       : chr "2019-01-29T14:11:51-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 4
+##   .. ..$ year        : int 1987
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/20975"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 11988356
+##   .. ..$ thumb       : chr "https://img.discogs.com/TxhBfL0gtdFTGTmeioF4auSibQ4=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Louder Than Bombs"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/b-qEth2aIJpJBtH0uYJ9hU1pHd4=/fit-in/600x596/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/11988356"
+##   .. ..$ master_id   : int 20975
+##   ..$ id               : int 11988356
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350296006
+##   ..$ date_added       : chr "2019-01-29T14:09:01-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 1979
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/53856"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 391325
+##   .. ..$ thumb       : chr "https://img.discogs.com/eNftV7Nl0p_jApJz7kAFo1AQlnI=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "The B-52's"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/JHqHpGgiyV4p3jAlvxkyGi_Elxc=/fit-in/600x600/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/391325"
+##   .. ..$ master_id   : int 53856
+##   ..$ id               : int 391325
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350295890
+##   ..$ date_added       : chr "2019-01-29T14:08:30-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 0
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/53856"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 9035150
+##   .. ..$ thumb       : chr "https://img.discogs.com/Ott6F9ptmmhRWnjMVQhEOO5EAfU=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "The B-52's"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/UHkXoyyRaX_571HfascazuHeKf0=/fit-in/600x915/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/9035150"
+##   .. ..$ master_id   : int 53856
+##   ..$ id               : int 9035150
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350295258
+##   ..$ date_added       : chr "2019-01-29T14:05:54-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 2
+##   .. ..$ year        : int 2007
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/333197"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 3496285
+##   .. ..$ thumb       : chr "https://img.discogs.com/Xs8DNGV6xIjqUjMmp1cFjH5cruw=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Alienated"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/pX_pnaAxT2Wj8lMQNXvwiXMHC1g=/fit-in/280x280/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/3496285"
+##   .. ..$ master_id   : int 333197
+##   ..$ id               : int 3496285
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350263643
+##   ..$ date_added       : chr "2019-01-29T12:02:10-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2014
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/719793"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 9721148
+##   .. ..$ thumb       : chr "https://img.discogs.com/qrb0OoYWeZbrmIBZgRHSfuhgwUE=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Ivy"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/mR2xGVS0StndHYj_KIVXtInOU7E=/fit-in/600x566/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/9721148"
+##   .. ..$ master_id   : int 719793
+##   ..$ id               : int 9721148
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350263415
+##   ..$ date_added       : chr "2019-01-29T12:01:16-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2018
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/1313083"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 11548953
+##   .. ..$ thumb       : chr "https://img.discogs.com/GlfdhuCDI4o1ejuzR297OZDFZBo=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Demo 2018"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/UQ3potpyyoniSNByuIV2IIWCQvY=/fit-in/600x577/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/11548953"
+##   .. ..$ master_id   : int 1313083
+##   ..$ id               : int 11548953
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350253515
+##   ..$ date_added       : chr "2019-01-29T11:24:24-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2017
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/1392598"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 11390065
+##   .. ..$ thumb       : chr "https://img.discogs.com/2_dyj3HE_OFjp5EJDkiEQ_yvxaQ=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Demo 2017"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/WTD4kicWDNdbld2nNFmSyXX2eL0=/fit-in/600x591/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/11390065"
+##   .. ..$ master_id   : int 1392598
+##   ..$ id               : int 11390065
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350253327
+##   ..$ date_added       : chr "2019-01-29T11:23:42-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2014
+##   .. ..$ master_url  : NULL
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 11514226
+##   .. ..$ thumb       : chr "https://img.discogs.com/JwZjzicVnkuIBtGyAfsaGr_ArRI=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Demo"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/KZEpjhw_WKVTBqMWIlpAEMG1R6Y=/fit-in/337x541/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/11514226"
+##   .. ..$ master_id   : int 0
+##   ..$ id               : int 11514226
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350251964
+##   ..$ date_added       : chr "2019-01-29T11:18:03-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2017
+##   .. ..$ master_url  : NULL
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 9956517
+##   .. ..$ thumb       : chr "https://img.discogs.com/S9nw0LLyrwnnEqVkpDN7dXuAolI=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Demo"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/E26mm8vDCv9Q4PGWOmvlQ8aIzGo=/fit-in/600x600/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/9956517"
+##   .. ..$ master_id   : int 0
+##   ..$ id               : int 9956517
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350251887
+##   ..$ date_added       : chr "2019-01-29T11:17:49-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2015
+##   .. ..$ master_url  : NULL
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 7983566
+##   .. ..$ thumb       : chr "https://img.discogs.com/34btrWzLO70uWuDmKlstFzDjJJU=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Under The Bleacherz"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/sUm0nbVri9G5FZjVMgS9R3HSico=/fit-in/600x584/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/7983566"
+##   .. ..$ master_id   : int 0
+##   ..$ id               : int 7983566
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350251833
+##   ..$ date_added       : chr "2019-01-29T11:17:34-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2015
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/991904"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 8435767
+##   .. ..$ thumb       : chr "https://img.discogs.com/4Vv2KcItzSylnnGox48ec4EYZCk=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Dumspell "
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/hUmcLPf0D_TQhv9ihVnclUDxiYo=/fit-in/600x1001/filters:strip_icc():format(jpeg):mode_rgb("| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/8435767"
+##   .. ..$ master_id   : int 991904
+##   ..$ id               : int 8435767
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350251739
+##   ..$ date_added       : chr "2019-01-29T11:17:10-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2015
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/993840"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 7506935
+##   .. ..$ thumb       : chr "https://img.discogs.com/5aanbiIXyCTfDgEFM2SUDNpMfLE=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Charm School"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/htmZn9F9uZzusrwLl80ZqW1MxIo=/fit-in/600x935/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/7506935"
+##   .. ..$ master_id   : int 993840
+##   ..$ id               : int 7506935
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350251527
+##   ..$ date_added       : chr "2019-01-29T11:16:24-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2015
+##   .. ..$ master_url  : NULL
+##   .. ..$ artists     :List of 2
+##   .. ..$ id          : int 7977493
+##   .. ..$ thumb       : chr "https://img.discogs.com/PeW6OQdjJoG9civGswBhHxCJ4jM=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Big Bag Split "
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/KbvEWd5nx2rTrETU1PArqCbjm_g=/fit-in/600x403/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/7977493"
+##   .. ..$ master_id   : int 0
+##   ..$ id               : int 7977493
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350251180
+##   ..$ date_added       : chr "2019-01-29T11:14:52-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 2
+##   .. ..$ year        : int 1987
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/20975"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 4337582
+##   .. ..$ thumb       : chr "https://img.discogs.com/pRa86bzRQngjCpbHxQQyiRm6snw=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Louder Than Bombs"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/MSge6CjQjXHbQw9pSa9OTxfqhhM=/fit-in/486x470/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/4337582"
+##   .. ..$ master_id   : int 20975
+##   ..$ id               : int 4337582
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350250943
+##   ..$ date_added       : chr "2019-01-29T11:13:51-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2014
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/816045"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 6840169
+##   .. ..$ thumb       : chr ""
+##   .. ..$ title       : chr "Sheer Mag"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/720182381cfb1a9425d9b33c5e2bd091040f9ebd/images/spacer.gif"
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/6840169"
+##   .. ..$ master_id   : int 816045
+##   ..$ id               : int 6840169
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350250880
+##   ..$ date_added       : chr "2019-01-29T11:13:38-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2017
+##   .. ..$ master_url  : NULL
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 11967072
+##   .. ..$ thumb       : chr "https://img.discogs.com/_UHrk4FFLVFShzDfLp33NMFbXBo=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Pleather"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/5vJhGU_WqFFKQ1InP8R-tFszqEE=/fit-in/600x605/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/11967072"
+##   .. ..$ master_id   : int 0
+##   ..$ id               : int 11967072
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350250829
+##   ..$ date_added       : chr "2019-01-29T11:13:26-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2017
+##   .. ..$ master_url  : NULL
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 11406918
+##   .. ..$ thumb       : chr "https://img.discogs.com/YqQ2XnbWwLeGNKJyWfmH-wn-C-A=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Demo 2017: The Savage Season Continues"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/sDWOcz8xKn0SrJolDDZlJJMOd1E=/fit-in/600x337/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/11406918"
+##   .. ..$ master_id   : int 0
+##   ..$ id               : int 11406918
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350250392
+##   ..$ date_added       : chr "2019-01-29T11:11:37-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2016
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/1022491"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 8716048
+##   .. ..$ thumb       : chr "https://img.discogs.com/7B0RImA1dFyqaoQq31FxOJZ1CCc=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Demo II: Demolition"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/8_jZuKGtAkSb01P1CTkkwHuOdhU=/fit-in/600x450/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/8716048"
+##   .. ..$ master_id   : int 1022491
+##   ..$ id               : int 8716048
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350250308
+##   ..$ date_added       : chr "2019-01-29T11:11:15-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2015
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/931450"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 7872463
+##   .. ..$ thumb       : chr "https://img.discogs.com/1nIRrHMaFejjkXQUGVOJiP4or90=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Firewalker"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/jkWVBAINbUg31Vq1ZFaHeTpXt4k=/fit-in/600x945/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/7872463"
+##   .. ..$ master_id   : int 931450
+##   ..$ id               : int 7872463
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350249933
+##   ..$ date_added       : chr "2019-01-29T11:09:44-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2016
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/3010"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 9367350
+##   .. ..$ thumb       : chr "https://img.discogs.com/rcKrWoZ_WiXsQHbFgRIQx75PfF8=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "I'm Wide Awake, It's Morning"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/OgF-vBU5Xg5J50eAM-l1afdKon4=/fit-in/600x589/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/9367350"
+##   .. ..$ master_id   : int 3010
+##   ..$ id               : int 9367350
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350229177
+##   ..$ date_added       : chr "2019-01-29T09:49:48-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2007
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/114440"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 5411566
+##   .. ..$ thumb       : chr "https://img.discogs.com/ZOkkzpmc1M4vKRrrcjKV8Hg6bnE=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "The Execution Of All Things"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/trBUxbAR6Apxb75cGlDx--gvNlA=/fit-in/600x607/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/5411566"
+##   .. ..$ master_id   : int 114440
+##   ..$ id               : int 5411566
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350228963
+##   ..$ date_added       : chr "2019-01-29T09:49:00-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2013
+##   .. ..$ master_url  : NULL
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 4465008
+##   .. ..$ thumb       : chr "https://img.discogs.com/WldYrGwYKGK1XidLyTlSWp4AB2c=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Hard Coming Down"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/MLyvpmQzMWo3J5az5FKbdutkjtE=/fit-in/600x600/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/4465008"
+##   .. ..$ master_id   : int 0
+##   ..$ id               : int 4465008
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350228728
+##   ..$ date_added       : chr "2019-01-29T09:48:10-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 2
+##   .. ..$ year        : int 2005
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/568505"
+##   .. ..$ artists     :List of 2
+##   .. ..$ id          : int 2708889
+##   .. ..$ thumb       : chr "https://img.discogs.com/OS43S9SS3NBJrPuQD7cXnvv7Tx0=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Discography"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/W-hruyqqLeRszKN2y64DqQeX-bw=/fit-in/600x613/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/2708889"
+##   .. ..$ master_id   : int 568505
+##   ..$ id               : int 2708889
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350228630
+##   ..$ date_added       : chr "2019-01-29T09:47:45-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 2
+##   .. ..$ year        : int 2018
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/245859"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 13020644
+##   .. ..$ thumb       : chr "https://img.discogs.com/YarwZe8Yytw4RpOFREAYuzoyd2s=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Set It Off"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/DFsJffb5b33g5U2oFIAGuScggFM=/fit-in/600x598/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/13020644"
+##   .. ..$ master_id   : int 245859
+##   ..$ id               : int 13020644
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350228478
+##   ..$ date_added       : chr "2019-01-29T09:47:04-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2010
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/228208"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 2138452
+##   .. ..$ thumb       : chr "https://img.discogs.com/qt5wNIzxPd8Qkx0a95QE24F7YUo=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Dear God, I Hate Myself"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/_c2HqyQjEZw6K78Umhfw7SChvoc=/fit-in/320x320/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/2138452"
+##   .. ..$ master_id   : int 228208
+##   ..$ id               : int 2138452
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350228069
+##   ..$ date_added       : chr "2019-01-29T09:45:26-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2015
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/1323130"
+##   .. ..$ artists     :List of 2
+##   .. ..$ id          : int 6850381
+##   .. ..$ thumb       : chr "https://img.discogs.com/juammt5dYgJCyX92EFneTYnRicY=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Merzxiu"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/dCuLZ3tcYuOsSQTDv1luUyg-QSA=/fit-in/600x600/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/6850381"
+##   .. ..$ master_id   : int 1323130
+##   ..$ id               : int 6850381
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350228020
+##   ..$ date_added       : chr "2019-01-29T09:45:13-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 2
+##   .. ..$ year        : int 2014
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/709327"
+##   .. ..$ artists     :List of 1
+##   .. ..$ id          : int 6487988
+##   .. ..$ thumb       : chr "https://img.discogs.com/eR4rkFC_MG_ZnEpE4SqRmF6m-8U=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "Vexx"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/2HNTCn8IC1xhUNcCLqjLoNHTsxg=/fit-in/600x600/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/6487988"
+##   .. ..$ master_id   : int 709327
+##   ..$ id               : int 6487988
+##   ..$ rating           : int 0
+##  $ :List of 5
+##   ..$ instance_id      : int 350227901
+##   ..$ date_added       : chr "2019-01-29T09:44:47-08:00"
+##   ..$ basic_information:List of 11
+##   .. ..$ labels      :List of 1
+##   .. ..$ year        : int 2014
+##   .. ..$ master_url  : chr "https://api.discogs.com/masters/687939"
+##   .. ..$ artists     :List of 3
+##   .. ..$ id          : int 5695822
+##   .. ..$ thumb       : chr "https://img.discogs.com/oIksRThmmBZt9Bf1AtGI25RqDj8=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ title       : chr "USA '13"
+##   .. ..$ formats     :List of 1
+##   .. ..$ cover_image : chr "https://img.discogs.com/u3NWWoeMwkLalbCoMVZt14JuBf4=/fit-in/600x600/filters:strip_icc():format(jpeg):mode_rgb()"| __truncated__
+##   .. ..$ resource_url: chr "https://api.discogs.com/releases/5695822"
+##   .. ..$ master_id   : int 687939
+##   ..$ id               : int 5695822
+##   ..$ rating           : int 0
+##   [list output truncated]
+```
+
+---
+
+
+```r
+tibble(disc = repurrrsive::discog) %&gt;% 
+  hoist(
+    disc, 
+    info = "basic_information"
+  )
+```
+
+```
+## # A tibble: 155 x 2
+##    info              disc            
+##    &lt;list&gt;            &lt;list&gt;          
+##  1 &lt;named list [11]&gt; &lt;named list [4]&gt;
+##  2 &lt;named list [11]&gt; &lt;named list [4]&gt;
+##  3 &lt;named list [11]&gt; &lt;named list [4]&gt;
+##  4 &lt;named list [11]&gt; &lt;named list [4]&gt;
+##  5 &lt;named list [11]&gt; &lt;named list [4]&gt;
+##  6 &lt;named list [11]&gt; &lt;named list [4]&gt;
+##  7 &lt;named list [11]&gt; &lt;named list [4]&gt;
+##  8 &lt;named list [11]&gt; &lt;named list [4]&gt;
+##  9 &lt;named list [11]&gt; &lt;named list [4]&gt;
+## 10 &lt;named list [11]&gt; &lt;named list [4]&gt;
+## # … with 145 more rows
+```
+
+---
+
+
+```r
+tibble(disc = repurrrsive::discog) %&gt;% 
+  hoist(
+    disc, 
+    id = "id",
+    info = "basic_information"
+  ) %&gt;%
+  hoist(
+    info,
+    year = c("year"), title = c("title"),
+    artist = list("artists", 1, "name"),
+    label = list("labels", 1, "name")
+  )
+```
+
+```
+## # A tibble: 155 x 7
+##         id  year title          artist       label             info     disc    
+##      &lt;int&gt; &lt;int&gt; &lt;chr&gt;          &lt;chr&gt;        &lt;chr&gt;             &lt;list&gt;   &lt;list&gt;  
+##  1  7.50e6  2015 Demo           Mollot       Tobi Records (2)  &lt;named … &lt;named …
+##  2  4.49e6  2013 Observant Com… Una Bèstia … La Vida Es Un Mus &lt;named … &lt;named …
+##  3  9.83e6  2017 I              S.H.I.T. (3) La Vida Es Un Mus &lt;named … &lt;named …
+##  4  9.77e6  2017 Oído Absoluto  Rata Negra   La Vida Es Un Mus &lt;named … &lt;named …
+##  5  7.24e6  2015 A Cat's Cause… Ivy (18)     Katorga Works     &lt;named … &lt;named …
+##  6  1.31e7  2019 Tashme         Tashme       High Fashion Ind… &lt;named … &lt;named …
+##  7  7.11e6  2014 Demo           Desgraciados Mind Control Rec… &lt;named … &lt;named …
+##  8  1.05e7  2015 Let The Mirac… Phantom Head Not On Label (Ph… &lt;named … &lt;named …
+##  9  1.13e7  2017 Sub Space      Sub Space (… Not On Label (Su… &lt;named … &lt;named …
+## 10  1.17e7  2017 Demo           Small Man (… Prescience Tapes  &lt;named … &lt;named …
+## # … with 145 more rows
+```
+
+---
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "solarized-light",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
