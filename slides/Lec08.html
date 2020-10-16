@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Lec 08 - Functional programming &amp; purrr</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Sem 1, 2020" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+    <link rel="stylesheet" href="slides.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Lec 08 - Functional programming &amp; purrr
+## <br/> Statistical Programming
+### Sem 1, 2020
+### <br/> Dr. Colin Rundel
+
+---
+
+exclude: true
+
+
+
+---
+class: middle
+count: false
+
+# Functional Programming
+
+---
+
+## Functions as objects
+
+We have mentioned in passing that functions in R are treated as 1st class objects (like vectors) 
+
+.pull-left[
+
+```r
+f = function(x) {
+  x*x
+}
+
+f(2)
+```
+
+```
+## [1] 4
+```
+
+```r
+g = f
+
+g(2)
+```
+
+```
+## [1] 4
+```
+]
+
+--
+
+.pull-right[
+
+```r
+l = list(f = f, g = g)
+
+l$f(3)
+```
+
+```
+## [1] 9
+```
+
+```r
+l[[2]](4)
+```
+
+```
+## [1] 16
+```
+
+```r
+l[1](3)
+```
+
+```
+## Error in eval(expr, envir, enclos): attempt to apply non-function
+```
+]
+
+---
+
+## Functions as arguments
+
+We can pass in functions as arguments to other functions,
+
+
+```r
+do_calc = function(v, func) {
+  func(v)
+}
+```
+
+--
+
+
+```r
+do_calc(1:3, sum)
+```
+
+```
+## [1] 6
+```
+
+```r
+do_calc(1:3, mean)
+```
+
+```
+## [1] 2
+```
+
+```r
+do_calc(1:3, sd)
+```
+
+```
+## [1] 1
+```
+
+
+---
+
+## Anonymous functions
+
+These are short functions that are created without ever assigning a name,
+
+
+```r
+function(x) {x+1}
+```
+
+```
+## function(x) {x+1}
+```
+
+```r
+(function(y) {y-1})(10)
+```
+
+```
+## [1] 9
+```
+
+--
+
+this can be particularly helpful for implementing certain types of tasks,
+
+
+```r
+integrate(function(x) x, 0, 1)
+```
+
+```
+## 0.5 with absolute error &lt; 5.6e-15
+```
+
+```r
+integrate(function(x) x^2-2*x+1, 0, 1)
+```
+
+```
+## 0.3333333 with absolute error &lt; 3.7e-15
+```
+
+```r
+integrate(function(x) sin(x)^2+cos(x)^2, 0, pi)
+```
+
+```
+## 3.141593 with absolute error &lt; 3.5e-14
+```
+
+
+---
+class: middle
+count: false
+
+# apply (base R)
+
+---
+
+## Apply functions
+
+The apply functions are a collection of tools for functional programming in base R, they are variations of the `map` function found in many other languages and apply a function over the elements of the input.
+
+
+```r
+??base::apply
+---
+
+## 
+## Help files with alias or concept or title matching ‘apply’ using fuzzy
+## matching:
+## 
+## base::apply             Apply Functions Over Array Margins
+## base::.subset           Internal Objects in Package 'base'
+## base::by                Apply a Function to a Data Frame Split by Factors
+## base::eapply            Apply a Function Over Values in an Environment
+## base::lapply            Apply a Function over a List or Vector
+## base::mapply            Apply a Function to Multiple List or Vector Arguments
+## base::rapply            Recursively Apply a Function to a List
+## base::tapply            Apply a Function Over a Ragged Array
+```
+
+---
+
+## lapply
+
+Usage: `lapply(X, FUN, ...)`
+
+`lapply` returns a list of the same length as `X`, each element of which is the result of applying `FUN` to the corresponding element of `X`.
+
+&lt;br/&gt;
+
+.pull-left[
+
+```r
+lapply(1:8, sqrt) %&gt;% str()
+```
+
+```
+## List of 8
+##  $ : num 1
+##  $ : num 1.41
+##  $ : num 1.73
+##  $ : num 2
+##  $ : num 2.24
+##  $ : num 2.45
+##  $ : num 2.65
+##  $ : num 2.83
+```
+]
+
+.pull-right[
+
+```r
+lapply(1:8, function(x) (x+1)^2) %&gt;% str()
+```
+
+```
+## List of 8
+##  $ : num 4
+##  $ : num 9
+##  $ : num 16
+##  $ : num 25
+##  $ : num 36
+##  $ : num 49
+##  $ : num 64
+##  $ : num 81
+```
+]
+
+---
+
+
+```r
+lapply(1:8, function(x, pow) x^pow, pow=3) %&gt;% str()
+```
+
+```
+## List of 8
+##  $ : num 1
+##  $ : num 8
+##  $ : num 27
+##  $ : num 64
+##  $ : num 125
+##  $ : num 216
+##  $ : num 343
+##  $ : num 512
+```
+
+--
+
+
+```r
+lapply(1:8, function(x, pow) x^pow, x=2) %&gt;% str()
+```
+
+```
+## List of 8
+##  $ : num 2
+##  $ : num 4
+##  $ : num 8
+##  $ : num 16
+##  $ : num 32
+##  $ : num 64
+##  $ : num 128
+##  $ : num 256
+```
+
+---
+
+## sapply
+
+Usage: `sapply(X, FUN, ..., simplify = TRUE, USE.NAMES = TRUE)`
+
+`sapply` is a *user-friendly* version and wrapper of `lapply`, it is a *simplifying* version of lapply. Whenever possible it will return a vector, matrix, or an array.
+
+&lt;br/&gt;
+
+
+```r
+sapply(1:8, sqrt)
+```
+
+```
+## [1] 1.000000 1.414214 1.732051 2.000000 2.236068 2.449490 2.645751 2.828427
+```
+
+```r
+sapply(1:8, function(x) (x+1)^2)
+```
+
+```
+## [1]  4  9 16 25 36 49 64 81
+```
+
+```r
+sapply(1:8, function(x) c(x, x^2, x^3, x^4))
+```
+
+```
+##      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8]
+## [1,]    1    2    3    4    5    6    7    8
+## [2,]    1    4    9   16   25   36   49   64
+## [3,]    1    8   27   64  125  216  343  512
+## [4,]    1   16   81  256  625 1296 2401 4096
+```
+
+---
+
+What happens if the returned lengths don't match?
+
+.pull-left[
+
+```r
+sapply(1:6, seq)
+```
+
+```
+## [[1]]
+## [1] 1
+## 
+## [[2]]
+## [1] 1 2
+## 
+## [[3]]
+## [1] 1 2 3
+## 
+## [[4]]
+## [1] 1 2 3 4
+## 
+## [[5]]
+## [1] 1 2 3 4 5
+## 
+## [[6]]
+## [1] 1 2 3 4 5 6
+```
+]
+
+--
+
+.pull-right[
+
+```r
+lapply(1:6, seq)
+```
+
+```
+## [[1]]
+## [1] 1
+## 
+## [[2]]
+## [1] 1 2
+## 
+## [[3]]
+## [1] 1 2 3
+## 
+## [[4]]
+## [1] 1 2 3 4
+## 
+## [[5]]
+## [1] 1 2 3 4 5
+## 
+## [[6]]
+## [1] 1 2 3 4 5 6
+```
+]
+
+---
+
+What happens if the types don't match?
+
+
+```r
+l = list(a = 1:3, b = 4:6, c = 7:9, d = list(10, 11, "A"))
+```
+
+
+```r
+sapply(l, function(x) x[1])
+```
+
+```
+## $a
+## [1] 1
+## 
+## $b
+## [1] 4
+## 
+## $c
+## [1] 7
+## 
+## $d
+## [1] 10
+```
+
+--
+
+
+```r
+sapply(l, function(x) x[[1]])
+```
+
+```
+##  a  b  c  d 
+##  1  4  7 10
+```
+
+--
+
+
+```r
+sapply(l, function(x) x[[3]])
+```
+
+```
+##   a   b   c   d 
+## "3" "6" "9" "A"
+```
+
+---
+
+## `*`apply and data frames
+
+We can use these functions with data frames, the key is to remember that a data frame is just a fancy list.
+
+
+```r
+df = data.frame(
+  a = 1:6, 
+  b = letters[1:6], 
+  c = c(TRUE,FALSE)
+)
+```
+
+
+```r
+lapply(df, class) %&gt;% str()
+```
+
+```
+## List of 3
+##  $ a: chr "integer"
+##  $ b: chr "character"
+##  $ c: chr "logical"
+```
+
+```r
+sapply(df, class)
+```
+
+```
+##           a           b           c 
+##   "integer" "character"   "logical"
+```
+
+---
+
+## A more useful example
+
+Recall Exercise 2 from Lecture 5 where we converted `-999` to `NA`s.
+
+
+```r
+d = data.frame(
+  patient_id = c(1, 2, 3, 4, 5),
+  age = c(32, 27, 56, 19, 65),
+  bp = c(110, 100, 125, -999, -999),
+  o2 = c(97, 95, -999, -999, 99)
+)
+```
+
+--
+
+.pull-left[
+
+```r
+fix_missing = function(x) {
+  x[x == -999] = NA
+  x
+}
+lapply(d, fix_missing)
+```
+
+```
+## $patient_id
+## [1] 1 2 3 4 5
+## 
+## $age
+## [1] 32 27 56 19 65
+## 
+## $bp
+## [1] 110 100 125  NA  NA
+## 
+## $o2
+## [1] 97 95 NA NA 99
+```
+]
+
+--
+
+.pull-right[
+
+```r
+lapply(d, fix_missing) %&gt;%
+  as.data.frame()
+```
+
+```
+##   patient_id age  bp o2
+## 1          1  32 110 97
+## 2          2  27 100 95
+## 3          3  56 125 NA
+## 4          4  19  NA NA
+## 5          5  65  NA 99
+```
+]
+
+---
+
+dplyr is also a viable option here, 
+
+
+```r
+d %&gt;%
+  mutate_if(is.numeric, fix_missing)
+```
+
+```
+##   patient_id age  bp o2
+## 1          1  32 110 97
+## 2          2  27 100 95
+## 3          3  56 125 NA
+## 4          4  19  NA NA
+## 5          5  65  NA 99
+```
+
+
+---
+
+## other less common apply functions
+
+* `apply()` - applies a function over the rows or columns of a data frame, matrix or array
+
+* `vapply()` - is similar to `sapply`, but has a enforced return type and size
+
+* `mapply()` -  like `sapply` but will iterate over multiple vectors at the same time.
+
+* `rapply()` - a recursive version of `lapply`, behavior depends largely on the `how` argument
+
+* `eapply()` -  apply a function over an environment.
+
+---
+class: middle
+
+.center[
+&lt;img src="imgs/hex-purrr.png" width="45%" /&gt;
+]
+
+---
+
+## Map functions
+
+Basic functions for looping over objects and returning a value (of a specific type) - replacement for `lapply`/`sapply`/`vapply`.
+
+* `map()` - returns a list.
+
+* `map_lgl()` - returns a logical vector.
+
+* `map_int()` - returns a integer vector.
+
+* `map_dbl()` - returns a double vector.
+
+* `map_chr()` - returns a character vector.
+
+* `map_dfr()` - returns a data frame by row binding.
+
+* `map_dfc()` - returns a data frame by column binding.
+
+* `walk()` - returns nothing, function used exclusively for its side effects
+
+
+---
+
+## Type Consistency
+
+R is a weakly / dynamically typed language which means there is no simple way to define a function which enforces the argument or return types. This flexibility can be useful at times, but often it makes it hard to reason about your code and requires more verbose code to handle edge cases.
+
+
+```r
+x = list(rnorm(1e3), rnorm(1e3), rnorm(1e3))
+```
+
+--
+
+
+```r
+map_dbl(x, mean)
+```
+
+```
+## [1] -0.0382136272 -0.0197121035  0.0001561886
+```
+
+--
+
+
+```r
+map_chr(x, mean)
+```
+
+```
+## [1] "-0.038214" "-0.019712" "0.000156"
+```
+
+--
+
+
+```r
+map_int(x, mean)
+```
+
+```
+## Error: Can't coerce element 1 from a double to a integer
+```
+
+--
+
+
+```r
+map(x, mean) %&gt;% str()
+```
+
+```
+## List of 3
+##  $ : num -0.0382
+##  $ : num -0.0197
+##  $ : num 0.000156
+```
+
+---
+
+## Working with Data Frames
+
+`map_dfr` and `map_dfc` are particularly useful when working with and/or creating data frames. 
+
+Take for example the Lecture 5 Exercise 2 example from above,
+
+.pull-left[
+
+```r
+d = data.frame(
+  patient_id = c(1, 2, 3, 4, 5),
+  age = c(32, 27, 56, 19, 65),
+  bp = c(110, 100, 125, -999, -999),
+  o2 = c(97, 95, -999, -999, 99)
+)
+```
+]
+
+.pull-right[
+
+```r
+fix_missing = function(x) {
+  x[x == -999] = NA
+  x
+}
+```
+]
+
+&lt;br/&gt;
+
+
+```r
+purrr::map_dfc(d, fix_missing)
+```
+
+```
+## # A tibble: 5 x 4
+##   patient_id   age    bp    o2
+##        &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1          1    32   110    97
+## 2          2    27   100    95
+## 3          3    56   125    NA
+## 4          4    19    NA    NA
+## 5          5    65    NA    99
+```
+
+---
+
+
+```r
+map_dfr(head(sw_people, 10), function(x) x[1:5])
+```
+
+```
+## # A tibble: 10 x 5
+##    name               height mass  hair_color    skin_color 
+##    &lt;chr&gt;              &lt;chr&gt;  &lt;chr&gt; &lt;chr&gt;         &lt;chr&gt;      
+##  1 Luke Skywalker     172    77    blond         fair       
+##  2 C-3PO              167    75    n/a           gold       
+##  3 R2-D2              96     32    n/a           white, blue
+##  4 Darth Vader        202    136   none          white      
+##  5 Leia Organa        150    49    brown         light      
+##  6 Owen Lars          178    120   brown, grey   light      
+##  7 Beru Whitesun lars 165    75    brown         light      
+##  8 R5-D4              97     32    n/a           white, red 
+##  9 Biggs Darklighter  183    84    black         light      
+## 10 Obi-Wan Kenobi     182    77    auburn, white fair
+```
+
+--
+
+&lt;br/&gt;
+
+
+```r
+map_dfr(head(sw_people, 10), function(x) x)
+```
+
+```
+## Error: Internal error in `vec_assign()`: `value` should have been recycled to fit `x`.
+```
+
+---
+
+## Shortcut - Anonymous Functions
+
+purrr lets us write anonymous functions using one sided formulas where the argument is given by `.` or `.x` for `map` and related functions.
+
+
+```r
+map_dbl(1:5, function(x) x/(x+1))
+```
+
+```
+## [1] 0.5000000 0.6666667 0.7500000 0.8000000 0.8333333
+```
+
+--
+
+&lt;br/&gt;
+
+```r
+map_dbl(1:5, ~ ./(.+1))
+```
+
+```
+## [1] 0.5000000 0.6666667 0.7500000 0.8000000 0.8333333
+```
+
+--
+
+&lt;br/&gt;
+
+```r
+map_dbl(1:5, ~ .x/(.x+1))
+```
+
+```
+## [1] 0.5000000 0.6666667 0.7500000 0.8000000 0.8333333
+```
+
+--
+
+&lt;br/&gt;
+
+Generally, the latter option is preferred to avoid confusion with magrittr.
+
+---
+
+## Shortcut - Anonymous Functions - `map2`
+
+Functions with the `map2` prefix work the same as the `map` functions but they iterate over two objects instead of one. Arguments in an anonymous function are given by `.x` and `.y` (or `..1` and `..2`) respectively.
+
+
+```r
+map2_dbl(1:5, 1:5, function(x,y) x / (y+1))
+```
+
+```
+## [1] 0.5000000 0.6666667 0.7500000 0.8000000 0.8333333
+```
+
+```r
+map2_dbl(1:5, 1:5, ~ .x/(.y+1))
+```
+
+```
+## [1] 0.5000000 0.6666667 0.7500000 0.8000000 0.8333333
+```
+
+```r
+map2_dbl(1:5, 1:5, ~ ..1/(..2+1))
+```
+
+```
+## [1] 0.5000000 0.6666667 0.7500000 0.8000000 0.8333333
+```
+
+--
+
+
+```r
+map2_chr(LETTERS[1:5], letters[1:5], paste0)
+```
+
+```
+## [1] "Aa" "Bb" "Cc" "Dd" "Ee"
+```
+
+---
+
+## Shortcut - Lookups
+
+Very often we want to extract only certain (named) values from a list, `purrr` provides a shortcut for this operation when you provide either a character or numeric value instead of a function to apply.
+
+--
+
+
+```r
+purrr::map_chr(head(sw_people), "name")
+```
+
+```
+## [1] "Luke Skywalker" "C-3PO"          "R2-D2"          "Darth Vader"   
+## [5] "Leia Organa"    "Owen Lars"
+```
+
+--
+
+
+```r
+purrr::map_chr(head(sw_people), 1)
+```
+
+```
+## [1] "Luke Skywalker" "C-3PO"          "R2-D2"          "Darth Vader"   
+## [5] "Leia Organa"    "Owen Lars"
+```
+
+--
+
+
+```r
+purrr::map_chr(head(sw_people), list("films", 1))
+```
+
+```
+## [1] "http://swapi.co/api/films/6/" "http://swapi.co/api/films/5/"
+## [3] "http://swapi.co/api/films/5/" "http://swapi.co/api/films/6/"
+## [5] "http://swapi.co/api/films/6/" "http://swapi.co/api/films/5/"
+```
+
+---
+
+## Length coercion?
+
+
+```r
+purrr::map_chr(head(sw_people), list("starships", 1))
+```
+
+```
+## Error: Result 2 must be a single string, not NULL of length 0
+```
+--
+
+&lt;br/&gt;
+
+```r
+sw_people[[2]]$name
+```
+
+```
+## [1] "C-3PO"
+```
+
+```r
+sw_people[[2]]$starships
+```
+
+```
+## NULL
+```
+
+--
+
+&lt;br/&gt;
+
+```r
+purrr::map_chr(head(sw_people), list("starships", 1), .default = NA)
+```
+
+```
+## [1] "http://swapi.co/api/starships/12/" NA                                 
+## [3] NA                                  "http://swapi.co/api/starships/13/"
+## [5] NA                                  NA
+```
+
+---
+
+## list columns
+
+.pull-left[
+
+```r
+(chars = tibble(
+  name = purrr::map_chr(sw_people, "name"),
+  starships = purrr::map(sw_people, "starships")
+))
+```
+
+```
+## # A tibble: 87 x 2
+##    name               starships
+##    &lt;chr&gt;              &lt;list&gt;   
+##  1 Luke Skywalker     &lt;chr [2]&gt;
+##  2 C-3PO              &lt;NULL&gt;   
+##  3 R2-D2              &lt;NULL&gt;   
+##  4 Darth Vader        &lt;chr [1]&gt;
+##  5 Leia Organa        &lt;NULL&gt;   
+##  6 Owen Lars          &lt;NULL&gt;   
+##  7 Beru Whitesun lars &lt;NULL&gt;   
+##  8 R5-D4              &lt;NULL&gt;   
+##  9 Biggs Darklighter  &lt;chr [1]&gt;
+## 10 Obi-Wan Kenobi     &lt;chr [5]&gt;
+## # … with 77 more rows
+```
+]
+
+.pull-right[
+
+```r
+chars %&gt;%
+  mutate(
+    n_starships = map_int(starships, length)
+  )
+```
+
+```
+## # A tibble: 87 x 3
+##    name               starships n_starships
+##    &lt;chr&gt;              &lt;list&gt;          &lt;int&gt;
+##  1 Luke Skywalker     &lt;chr [2]&gt;           2
+##  2 C-3PO              &lt;NULL&gt;              0
+##  3 R2-D2              &lt;NULL&gt;              0
+##  4 Darth Vader        &lt;chr [1]&gt;           1
+##  5 Leia Organa        &lt;NULL&gt;              0
+##  6 Owen Lars          &lt;NULL&gt;              0
+##  7 Beru Whitesun lars &lt;NULL&gt;              0
+##  8 R5-D4              &lt;NULL&gt;              0
+##  9 Biggs Darklighter  &lt;chr [1]&gt;           1
+## 10 Obi-Wan Kenobi     &lt;chr [5]&gt;           5
+## # … with 77 more rows
+```
+]
+
+---
+class: middle, center
+
+## Demo - list columns and approximating pi
+
+
+
+---
+class: middle
+count: false
+
+# Acknowledgments
+
+---
+
+## Acknowledgments
+
+Above materials are derived in part from the following sources:
+
+* Hadley Wickham - [Adv-R Functionals](http://adv-r.had.co.nz/Functionals.html)
+
+* Neil Saunders - [A brief introduction to "apply" in R](http://nsaunders.wordpress.com/2010/08/20/a-brief-introduction-to-apply-in-r/)
+
+* Jenny Bryan - [Purrr Tutorial](https://jennybc.github.io/purrr-tutorial/)
+
+* [R Language Definition](http://stat.ethz.ch/R-manual/R-devel/doc/manual/R-lang.html)
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "solarized-light",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
