@@ -33,11 +33,11 @@ class: middle, center
 ## The Grammar of Graphics
 
 - Visualisation concept created by Leland Wilkinson (1999)
-    - to define the basic elements of a statistical graphic 
+- to define the basic elements of a statistical graphic 
 
 - Adapted for R by Hadley Wickham (2009)
-    - consistent and compact syntax to describe statistical graphics
-    - highly modular as it breaks up graphs into semantic components 
+- consistent and compact syntax to describe statistical graphics
+- highly modular as it breaks up graphs into semantic components 
 
 - ggplot2 is not meant as a guide to which graph to use and how to best convey your data (more on that later), but it does have some strong opinions.
 
@@ -59,24 +59,24 @@ A statistical graphic is a...
 
 ```r
 ggplot(
-  data = [dataframe], 
-  mapping = aes(
-    x = [var x], y = [var y], 
-    color = [var color], 
-    shape = [var shape],
-    ...
-  )
+data = [dataframe], 
+mapping = aes(
+x = [var x], y = [var y], 
+color = [var color], 
+shape = [var shape],
+...
+)
 ) +
-  geom_[some geom](
-    mapping = aes(
-      color = [var geom color],
-      ...
-    )
-  ) +
-  ... # other geometries
-  scale_[some axis]_[some scale]() +
-  facet_[some facet]([formula]) +
-  ... # other options
+geom_[some geom](
+mapping = aes(
+color = [var geom color],
+...
+)
+) +
+... # other geometries
+scale_[some axis]_[some scale]() +
+facet_[some facet]([formula]) +
+... # other options
 ```
 
 ---
@@ -118,17 +118,12 @@ penguins
 
 ]
 
-
 ---
 
-## Plot
+## A basic ggplot
 
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-6-1.png" width="60%" style="display: block; margin: auto;" /&gt;
 
----
-
-## Code
-
+.pull-left[
 
 ```r
 ggplot(
@@ -141,7 +136,10 @@ ggplot(
   geom_point() +
   labs(
     title = "Bill depth and length",
-    subtitle = "Dimensions for Adelie, Chinstrap, and Gentoo Penguins",
+    subtitle = paste(
+      "Dimensions for Adelie, Chinstrap,",
+      "and Gentoo Penguins"
+    ),
     x = "Bill depth (mm)", 
     y = "Bill length (mm)",
     color = "Species"
@@ -151,6 +149,11 @@ ggplot(
 ```
 ## Warning: Removed 2 rows containing missing values (geom_point).
 ```
+]
+
+.pull-right[
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-6-1.png" width="95%" style="display: block; margin: auto;" /&gt;
+]
 
 ---
 
@@ -171,7 +174,7 @@ class: middle
 ```
 ]
 .pull-right[
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-7-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-7-1.png" width="95%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -191,7 +194,7 @@ ggplot(
 ```
 ]
 .pull-right[
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-8-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-8-1.png" width="95%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -215,7 +218,7 @@ ggplot(
 ```
 ]
 .pull-right[
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-9-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-9-1.png" width="95%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -241,7 +244,7 @@ ggplot(
 ```
 ]
 .pull-right[
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-10-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-10-1.png" width="95%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -261,16 +264,16 @@ ggplot(
   data = penguins,
   mapping = aes(
     x = bill_depth_mm,
-*   y = bill_length_mm
+    y = bill_length_mm
   )
 ) + 
   geom_point(
-    mapping = aes(color = species)
+*   mapping = aes(color = species)
   )
 ```
 ]
 .pull-right[
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-11-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-11-1.png" width="95%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -301,7 +304,7 @@ ggplot(
 ```
 ]
 .pull-right[
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-12-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-12-1.png" width="95%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -338,7 +341,7 @@ ggplot(
 ```
 ]
 .pull-right[
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-13-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-13-1.png" width="95%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -378,7 +381,7 @@ ggplot(
 ```
 ]
 .pull-right[
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-14-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-14-1.png" width="95%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -420,7 +423,7 @@ ggplot(
 ```
 ]
 .pull-right[
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-15-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-15-1.png" width="95%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -464,7 +467,7 @@ ggplot(
 ```
 ]
 .pull-right[
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-16-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-16-1.png" width="95%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -517,9 +520,7 @@ ggplot(
 
 ## Argument names
 
-.tip[
 Often we omit the names of first two arguments when building plots with `ggplot()`.
-]
 
 .pull-left[
 
@@ -554,6 +555,8 @@ ggplot(
 ```
 ]
 
+.footnote[**Note** that `ggplot` and `geom_*` swap the order of the `data` and `mapping` arguments.]
+
 ---
 
 class: middle
@@ -573,6 +576,11 @@ Commonly used characteristics of plotting characters that can be **mapped to a s
 
 Different geometries have different aesthetics that can be used - see the [ggplot2 geoms](https://ggplot2.tidyverse.org/reference/index.html#Geoms) help files for listings.
 
+
+* Aesthetics given in `ggplot` apply to all `geom`s.
+
+* Aesthetics for a specific `geom` can be overridden with the `geom_*`'s aesthetics.
+
 ---
 
 ## color
@@ -588,13 +596,12 @@ ggplot(
   )
 ) + 
   geom_point(
-    aes(color = species)
-  ) +
-  scale_color_viridis_d()
+*   aes(color = species)
+  )
 ```
 ]
 .pull-right[
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-18-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-18-1.png" width="95%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -613,13 +620,12 @@ ggplot(
     y = bill_length_mm
   )
 ) +
-    geom_point(
-      aes(
-        color = species,
-        shape = island
-      )
-    ) +
-    scale_color_viridis_d()
+  geom_point(
+    aes(
+*     color = species,
+*     shape = island
+    )
+  )
 ```
 ]
 .pull-right[
@@ -642,13 +648,12 @@ ggplot(
     y = bill_length_mm
   )
 ) +
-    geom_point(
-      aes(
-        color = species,
-        shape = species
-      )
-    ) +
-    scale_color_viridis_d()
+  geom_point(
+    aes(
+*     color = species,
+*     shape = species
+    )
+  )
 ```
 ]
 .pull-right[
@@ -671,18 +676,17 @@ ggplot(
     y = bill_length_mm
   )
 ) +
-    geom_point(
-      aes(
-        color = species,
-        shape = species
-      ),
-      size = 3
-    ) +
-    scale_color_viridis_d()
+  geom_point(
+    aes(
+      color = species,
+      shape = species
+    ),
+*   size = 3
+  )
 ```
 ]
 .pull-right[
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-21-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-21-1.png" width="95%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -701,18 +705,17 @@ ggplot(
     y = bill_length_mm
   )
 ) +
-    geom_point(
-      aes(
-        color = species,
-        shape = species,
-        size = body_mass_g
-      ),
-    ) +
-    scale_color_viridis_d()
+  geom_point(
+    aes(
+      color = species,
+      shape = species,
+      size = body_mass_g
+    ),
+  )
 ```
 ]
 .pull-right[
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-22-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-22-1.png" width="95%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -729,19 +732,18 @@ ggplot(
     y = bill_length_mm
   )
 ) +
-    geom_point(
-      aes(
-        color = species,
-        shape = species,
-        alpha = body_mass_g
-      ),
-      size = 3
-    ) +
-    scale_color_viridis_d()
+  geom_point(
+    aes(
+      color = species,
+      shape = species,
+      alpha = body_mass_g
+    ),
+    size = 3
+  )
 ```
 ]
 .pull-right[
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-23-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-23-1.png" width="95%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -749,11 +751,11 @@ ggplot(
 ## Mapping vs. setting
 
 - **Mapping:** Determine an aesthetic (the size, alpha, etc.) of a geom based on the values of a variable in the data
-  - goes into `aes()` as an argument which is then an argument of `ggplot2` or `geom_*()`.
+- goes into `aes()` as an argument which is then an argument of `ggplot2` or `geom_*()`.
 
 - **Setting:** Determine an aesthetic (the size, alpha, etc.) of a geom **not** based on the values of a variable in the data
-  - goes directly into `geom_*()` as an argument.
-  
+- goes directly into `geom_*()` as an argument.
+
 ---
 
 class: middle
@@ -768,7 +770,7 @@ class: middle
 
 - Useful for exploring conditional relationships and large data
 
-- Sometimes refered to as using small multiples
+- Sometimes refered to as "small multiples"
 
 ---
 
@@ -795,6 +797,34 @@ ggplot(
 
 ---
 
+## Compare with ...
+
+.pull-left[
+
+```r
+ggplot(
+  penguins, 
+  aes(
+    x = bill_depth_mm, 
+    y = bill_length_mm
+  )
+) + 
+  geom_point(
+    aes(
+      color = species,
+      shape = island
+    ), 
+    size = 3
+  )
+```
+]
+
+.pull-right[
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-25-1.png" width="95%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
 ## facet_grid (cols)
 
 .pull-left[
@@ -813,7 +843,7 @@ ggplot(
 ]
 
 .pull-right[
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-25-1.png" width="95%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-26-1.png" width="95%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -836,7 +866,7 @@ ggplot(
 ]
 
 .pull-right[
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-26-1.png" width="95%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-27-1.png" width="95%" style="display: block; margin: auto;" /&gt;
 ]
 
 
@@ -853,15 +883,15 @@ ggplot(
   aes(
     x = bill_depth_mm, 
     y = bill_length_mm
-    )
-  ) + 
+  )
+) + 
   geom_point() +
 * facet_wrap(~ species)
 ```
 ]
 
 .pull-right[
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-27-1.png" width="95%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-28-1.png" width="95%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -876,15 +906,15 @@ ggplot(
   aes(
     x = bill_depth_mm, 
     y = bill_length_mm
-    )
-  ) + 
+  )
+) + 
   geom_point() +
 * facet_wrap(~ species, ncol = 2)
 ```
 ]
 
 .pull-right[
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-28-1.png" width="95%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-29-1.png" width="95%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -903,12 +933,11 @@ ggplot(
   )
 ) +
   geom_point() +
-  facet_grid(species ~ sex) +
-* scale_color_viridis_d()
+  facet_grid(species ~ sex)
 ```
 ]
 .pull-right[
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-29-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-30-1.png" width="95%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -928,13 +957,12 @@ ggplot(
 ) +
   geom_point() +
   facet_grid(species ~ sex) +
-  scale_color_viridis_d() +
 * guides(color = FALSE)
 ```
 ]
 
 .pull-right[
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-30-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-31-1.png" width="95%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -964,33 +992,7 @@ ggplot(
 ]
 
 .pull-right[
-
-```
-## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
-```
-
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-31-1.png" width="100%" style="display: block; margin: auto;" /&gt;
-]
-
----
-
-## Histograms - bin
-
-.pull-left[
-
-```r
-ggplot(
-  penguins, 
-  aes(
-    x = body_mass_g, 
-  )
-) +
-  geom_histogram(binwidth = 250)
-```
-]
-
-.pull-right[
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-32-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-32-1.png" width="95%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -1011,8 +1013,31 @@ ggplot(
 ]
 
 .pull-right[
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-33-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-33-1.png" width="95%" style="display: block; margin: auto;" /&gt;
 ]
+
+---
+
+## Histograms - binwidth
+
+.pull-left[
+
+```r
+ggplot(
+  penguins, 
+  aes(
+    x = body_mass_g, 
+  )
+) +
+  geom_histogram(binwidth = 250)
+```
+]
+
+.pull-right[
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-34-1.png" width="95%" style="display: block; margin: auto;" /&gt;
+]
+
+
 
 ---
 
@@ -1033,7 +1058,7 @@ ggplot(
 ]
 
 .pull-right[
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-34-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-35-1.png" width="95%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -1055,8 +1080,35 @@ ggplot(
 ]
 
 .pull-right[
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-35-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-36-1.png" width="95%" style="display: block; margin: auto;" /&gt;
 ]
+
+---
+
+## Histograms - position
+
+.pull-left[
+
+```r
+ggplot(
+  penguins, 
+  aes(
+    x = body_mass_g, 
+    fill = species
+  )
+) +
+  geom_histogram(
+    bins = 20,
+    position = "identity",
+    alpha = 0.5
+  )
+```
+]
+
+.pull-right[
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-37-1.png" width="95%" style="display: block; margin: auto;" /&gt;
+]
+
 
 ---
 
@@ -1072,14 +1124,14 @@ ggplot(
     fill = species
   )
 ) +
-  geom_histogram(bins = 15) +
+  geom_histogram(bins = 20) +
   facet_grid(species ~ .) + 
   guides(fill = FALSE)
 ```
 ]
 
 .pull-right[
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-36-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-38-1.png" width="95%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -1100,7 +1152,7 @@ ggplot(
 ]
 
 .pull-right[
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-37-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-39-1.png" width="95%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -1122,7 +1174,7 @@ ggplot(
 ]
 
 .pull-right[
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-38-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-40-1.png" width="95%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -1147,7 +1199,7 @@ ggplot(
 ]
 
 .pull-right[
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-39-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-41-1.png" width="95%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -1170,7 +1222,7 @@ ggplot(
 ]
 
 .pull-right[
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-40-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-42-1.png" width="95%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -1197,7 +1249,7 @@ ggplot(
 ]
 
 .pull-right[
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-41-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-43-1.png" width="95%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -1227,7 +1279,7 @@ penguins %&gt;%
 ]
 
 .pull-right[
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-42-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-44-1.png" width="95%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -1249,7 +1301,7 @@ ggplot(
 ]
 
 .pull-right[
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-43-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-45-1.png" width="95%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -1272,7 +1324,7 @@ ggplot(
 ]
 
 .pull-right[
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-44-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-46-1.png" width="95%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -1294,7 +1346,7 @@ ggplot(
 ]
 
 .pull-right[
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-45-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-47-1.png" width="95%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -1317,12 +1369,42 @@ ggplot(
 ]
 
 .pull-right[
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-46-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-48-1.png" width="95%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
 
 ## Scatter plot - geom_smooth
+
+.pull-left[
+
+```r
+ggplot(
+  penguins, 
+  aes(
+    x = bill_depth_mm, 
+    y = bill_length_mm, 
+    color = species
+  )
+) +
+  geom_point() +
+  geom_smooth(
+    fullrange = TRUE
+  )
+```
+
+```
+## `geom_smooth()` using method = 'loess' and formula 'y ~ x'
+```
+]
+
+.pull-right[
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-49-1.png" width="95%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+## Scatter plot - geom_smooth w/ lm
 
 .pull-left[
 
@@ -1349,39 +1431,10 @@ ggplot(
 ]
 
 .pull-right[
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-47-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-50-1.png" width="95%" style="display: block; margin: auto;" /&gt;
 ]
 
----
 
-## Scatter plot - geom_smooth
-
-.pull-left[
-
-```r
-ggplot(
-  penguins, 
-  aes(
-    x = bill_depth_mm, 
-    y = bill_length_mm, 
-    color = species
-  )
-) +
-  geom_point() +
-  geom_smooth(
-    se = FALSE,
-    fullrange = TRUE
-  )
-```
-
-```
-## `geom_smooth()` using method = 'loess' and formula 'y ~ x'
-```
-]
-
-.pull-right[
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-48-1.png" width="100%" style="display: block; margin: auto;" /&gt;
-]
 
 ---
 
@@ -1405,7 +1458,7 @@ penguins %&gt;%
 ]
 
 .pull-right[
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-49-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-51-1.png" width="95%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -1431,7 +1484,7 @@ penguins %&gt;%
 ]
 
 .pull-right[
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-50-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-52-1.png" width="95%" style="display: block; margin: auto;" /&gt;
 ]
 
 
@@ -1453,7 +1506,7 @@ ggplot(
 ]
 
 .pull-right[
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-51-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-53-1.png" width="95%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -1475,7 +1528,7 @@ ggplot(
 ]
 
 .pull-right[
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-52-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-54-1.png" width="95%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -1497,7 +1550,7 @@ ggplot(
 ]
 
 .pull-right[
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-53-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-55-1.png" width="95%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -1519,7 +1572,7 @@ ggplot(
 ]
 
 .pull-right[
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-54-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-56-1.png" width="95%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -1533,7 +1586,7 @@ class: middle
 
 Recreate, as faithfully as possible, the following plot using ggplot2 and the `penguins` data.
 
-&lt;img src="Lec09_files/figure-html/unnamed-chunk-55-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Lec09_files/figure-html/unnamed-chunk-57-1.png" width="60%" style="display: block; margin: auto;" /&gt;
 
 
 ---

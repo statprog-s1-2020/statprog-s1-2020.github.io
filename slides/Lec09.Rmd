@@ -41,11 +41,11 @@ knitr::include_graphics("imgs/hex-ggplot2.png")
 ## The Grammar of Graphics
 
 - Visualisation concept created by Leland Wilkinson (1999)
-    - to define the basic elements of a statistical graphic 
+- to define the basic elements of a statistical graphic 
 
 - Adapted for R by Hadley Wickham (2009)
-    - consistent and compact syntax to describe statistical graphics
-    - highly modular as it breaks up graphs into semantic components 
+- consistent and compact syntax to describe statistical graphics
+- highly modular as it breaks up graphs into semantic components 
 
 - ggplot2 is not meant as a guide to which graph to use and how to best convey your data (more on that later), but it does have some strong opinions.
 
@@ -67,24 +67,24 @@ A statistical graphic is a...
 
 ```r
 ggplot(
-  data = [dataframe], 
-  mapping = aes(
-    x = [var x], y = [var y], 
-    color = [var color], 
-    shape = [var shape],
-    ...
-  )
+data = [dataframe], 
+mapping = aes(
+x = [var x], y = [var y], 
+color = [var color], 
+shape = [var shape],
+...
+)
 ) +
-  geom_[some geom](
-    mapping = aes(
-      color = [var geom color],
-      ...
-    )
-  ) +
-  ... # other geometries
-  scale_[some axis]_[some scale]() +
-  facet_[some facet]([formula]) +
-  ... # other options
+geom_[some geom](
+mapping = aes(
+color = [var geom color],
+...
+)
+) +
+... # other geometries
+scale_[some axis]_[some scale]() +
+facet_[some facet]([formula]) +
+... # other options
 ```
 
 ---
@@ -109,22 +109,16 @@ penguins
 ```
 
 ```{r echo=FALSE}
-options(width = 80)
+options(width = 65)
 ```
 ]
 
-
 ---
 
-## Plot
+## A basic ggplot
 
-```{r ref.label = "penguins", echo = FALSE, warning = FALSE, out.width = "60%", fig.width = 8}
-```
 
----
-
-## Code
-
+.pull-left[
 ```{r penguins, fig.show = "hide"}
 ggplot(
   data = penguins, 
@@ -136,12 +130,21 @@ ggplot(
   geom_point() +
   labs(
     title = "Bill depth and length",
-    subtitle = "Dimensions for Adelie, Chinstrap, and Gentoo Penguins",
+    subtitle = paste(
+      "Dimensions for Adelie, Chinstrap,",
+      "and Gentoo Penguins"
+    ),
     x = "Bill depth (mm)", 
     y = "Bill length (mm)",
     color = "Species"
   )
 ```
+]
+
+.pull-right[
+```{r ref.label = "penguins", echo = FALSE, warning = FALSE, out.width = "95%", fig.width = 8}
+```
+]
 
 ---
 
@@ -161,7 +164,7 @@ ggplot(data = penguins) #<<
 ```
 ]
 .pull-right[
-```{r ref.label = "penguins-0", echo = FALSE, warning = FALSE, out.width = "100%", fig.width = 8}
+```{r ref.label = "penguins-0", echo = FALSE, warning = FALSE, out.width = "95%", fig.width = 8}
 ```
 ]
 
@@ -181,7 +184,7 @@ ggplot(
 ```
 ]
 .pull-right[
-```{r ref.label = "penguins-1", echo = FALSE, warning = FALSE, out.width = "100%", fig.width = 8}
+```{r ref.label = "penguins-1", echo = FALSE, warning = FALSE, out.width = "95%", fig.width = 8}
 ```
 ]
 
@@ -205,7 +208,7 @@ ggplot(
 ```
 ]
 .pull-right[
-```{r ref.label = "penguins-2", echo = FALSE, warning = FALSE, out.width = "100%", fig.width = 8}
+```{r ref.label = "penguins-2", echo = FALSE, warning = FALSE, out.width = "95%", fig.width = 8}
 ```
 ]
 
@@ -231,7 +234,7 @@ ggplot(
 ```
 ]
 .pull-right[
-```{r ref.label = "penguins-3", echo = FALSE, warning = FALSE, out.width = "100%", fig.width = 8}
+```{r ref.label = "penguins-3", echo = FALSE, warning = FALSE, out.width = "95%", fig.width = 8}
 ```
 ]
 
@@ -251,16 +254,16 @@ ggplot(
   data = penguins,
   mapping = aes(
     x = bill_depth_mm,
-    y = bill_length_mm#<<
+    y = bill_length_mm
   )
 ) + 
   geom_point(
-    mapping = aes(color = species)
+    mapping = aes(color = species) #<<
   )
 ```
 ]
 .pull-right[
-```{r ref.label = "penguins-4", echo = FALSE, warning = FALSE, out.width = "100%", fig.width = 8}
+```{r ref.label = "penguins-4", echo = FALSE, warning = FALSE, out.width = "95%", fig.width = 8}
 ```
 ]
 
@@ -291,7 +294,7 @@ ggplot(
 ```
 ]
 .pull-right[
-```{r ref.label = "penguins-5", echo = FALSE, warning = FALSE, out.width = "100%", fig.width = 8}
+```{r ref.label = "penguins-5", echo = FALSE, warning = FALSE, out.width = "95%", fig.width = 8}
 ```
 ]
 
@@ -328,7 +331,7 @@ ggplot(
 ```
 ]
 .pull-right[
-```{r ref.label = "penguins-6", echo = FALSE, warning = FALSE, out.width = "100%", fig.width = 8}
+```{r ref.label = "penguins-6", echo = FALSE, warning = FALSE, out.width = "95%", fig.width = 8}
 ```
 ]
 
@@ -368,7 +371,7 @@ ggplot(
 ```
 ]
 .pull-right[
-```{r ref.label = "penguins-7", echo = FALSE, warning = FALSE, out.width = "100%", fig.width = 8}
+```{r ref.label = "penguins-7", echo = FALSE, warning = FALSE, out.width = "95%", fig.width = 8}
 ```
 ]
 
@@ -410,7 +413,7 @@ ggplot(
 ```
 ]
 .pull-right[
-```{r ref.label = "penguins-8", echo = FALSE, warning = FALSE, out.width = "100%", fig.width = 8}
+```{r ref.label = "penguins-8", echo = FALSE, warning = FALSE, out.width = "95%", fig.width = 8}
 ```
 ]
 
@@ -454,7 +457,7 @@ ggplot(
 ```
 ]
 .pull-right[
-```{r ref.label = "penguins-9", echo = FALSE, warning = FALSE, out.width = "100%", fig.width = 8}
+```{r ref.label = "penguins-9", echo = FALSE, warning = FALSE, out.width = "95%", fig.width = 8}
 ```
 ]
 
@@ -508,9 +511,7 @@ ggplot(
 
 ## Argument names
 
-.tip[
 Often we omit the names of first two arguments when building plots with `ggplot()`.
-]
 
 .pull-left[
 ```{r named-args, eval = FALSE}
@@ -543,6 +544,8 @@ ggplot(
 ```
 ]
 
+.footnote[**Note** that `ggplot` and `geom_*` swap the order of the `data` and `mapping` arguments.]
+
 ---
 
 class: middle
@@ -562,6 +565,11 @@ Commonly used characteristics of plotting characters that can be **mapped to a s
 
 Different geometries have different aesthetics that can be used - see the [ggplot2 geoms](https://ggplot2.tidyverse.org/reference/index.html#Geoms) help files for listings.
 
+
+* Aesthetics given in `ggplot` apply to all `geom`s.
+
+* Aesthetics for a specific `geom` can be overridden with the `geom_*`'s aesthetics.
+
 ---
 
 ## color
@@ -576,13 +584,12 @@ ggplot(
   )
 ) + 
   geom_point(
-    aes(color = species)
-  ) +
-  scale_color_viridis_d()
+    aes(color = species) #<<
+  )
 ```
 ]
 .pull-right[
-```{r ref.label = "color", echo = FALSE, warning = FALSE, out.width = "100%"}
+```{r ref.label = "color", echo = FALSE, warning = FALSE, out.width = "95%"}
 ```
 ]
 
@@ -601,13 +608,12 @@ ggplot(
     y = bill_length_mm
   )
 ) +
-    geom_point(
-      aes(
-        color = species,
-        shape = island
-      )
-    ) +
-    scale_color_viridis_d()
+  geom_point(
+    aes(
+      color = species, #<<
+      shape = island   #<<
+    )
+  )
 ```
 ]
 .pull-right[
@@ -630,13 +636,12 @@ ggplot(
     y = bill_length_mm
   )
 ) +
-    geom_point(
-      aes(
-        color = species,
-        shape = species
-      )
-    ) +
-    scale_color_viridis_d()
+  geom_point(
+    aes(
+      color = species, #<<
+      shape = species  #<<
+    )
+  )
 ```
 ]
 .pull-right[
@@ -659,18 +664,17 @@ ggplot(
     y = bill_length_mm
   )
 ) +
-    geom_point(
-      aes(
-        color = species,
-        shape = species
-      ),
-      size = 3
-    ) +
-    scale_color_viridis_d()
+  geom_point(
+    aes(
+      color = species,
+      shape = species
+    ),
+    size = 3 #<<
+  )
 ```
 ]
 .pull-right[
-```{r ref.label = "size1", echo = FALSE, warning = FALSE, out.width = "100%"}
+```{r ref.label = "size1", echo = FALSE, warning = FALSE, out.width = "95%"}
 ```
 ]
 
@@ -689,18 +693,17 @@ ggplot(
     y = bill_length_mm
   )
 ) +
-    geom_point(
-      aes(
-        color = species,
-        shape = species,
-        size = body_mass_g
-      ),
-    ) +
-    scale_color_viridis_d()
+  geom_point(
+    aes(
+      color = species,
+      shape = species,
+      size = body_mass_g
+    ),
+  )
 ```
 ]
 .pull-right[
-```{r ref.label = "size2", echo = FALSE, warning = FALSE, out.width = "100%"}
+```{r ref.label = "size2", echo = FALSE, warning = FALSE, out.width = "95%"}
 ```
 ]
 
@@ -717,19 +720,18 @@ ggplot(
     y = bill_length_mm
   )
 ) +
-    geom_point(
-      aes(
-        color = species,
-        shape = species,
-        alpha = body_mass_g
-      ),
-      size = 3
-    ) +
-    scale_color_viridis_d()
+  geom_point(
+    aes(
+      color = species,
+      shape = species,
+      alpha = body_mass_g
+    ),
+    size = 3
+  )
 ```
 ]
 .pull-right[
-```{r ref.label = "alpha", echo = FALSE, warning = FALSE, out.width = "100%"}
+```{r ref.label = "alpha", echo = FALSE, warning = FALSE, out.width = "95%"}
 ```
 ]
 
@@ -738,11 +740,11 @@ ggplot(
 ## Mapping vs. setting
 
 - **Mapping:** Determine an aesthetic (the size, alpha, etc.) of a geom based on the values of a variable in the data
-  - goes into `aes()` as an argument which is then an argument of `ggplot2` or `geom_*()`.
+- goes into `aes()` as an argument which is then an argument of `ggplot2` or `geom_*()`.
 
 - **Setting:** Determine an aesthetic (the size, alpha, etc.) of a geom **not** based on the values of a variable in the data
-  - goes directly into `geom_*()` as an argument.
-  
+- goes directly into `geom_*()` as an argument.
+
 ---
 
 class: middle
@@ -757,7 +759,7 @@ class: middle
 
 - Useful for exploring conditional relationships and large data
 
-- Sometimes refered to as using small multiples
+- Sometimes refered to as "small multiples"
 
 ---
 
@@ -779,6 +781,34 @@ ggplot(
 
 .pull-right[
 ```{r ref.label = "facet", echo = FALSE, warning = FALSE, out.width = "95%"}
+```
+]
+
+---
+
+## Compare with ...
+
+.pull-left[
+```{r facet_comp, warning = FALSE, fig.show = "hide"}
+ggplot(
+  penguins, 
+  aes(
+    x = bill_depth_mm, 
+    y = bill_length_mm
+  )
+) + 
+  geom_point(
+    aes(
+      color = species,
+      shape = island
+    ), 
+    size = 3
+  )
+```
+]
+
+.pull-right[
+```{r ref.label = "facet_comp", echo = FALSE, warning = FALSE, out.width = "95%"}
 ```
 ]
 
@@ -841,8 +871,8 @@ ggplot(
   aes(
     x = bill_depth_mm, 
     y = bill_length_mm
-    )
-  ) + 
+  )
+) + 
   geom_point() +
   facet_wrap(~ species) #<<
 ```
@@ -864,8 +894,8 @@ ggplot(
   aes(
     x = bill_depth_mm, 
     y = bill_length_mm
-    )
-  ) + 
+  )
+) + 
   geom_point() +
   facet_wrap(~ species, ncol = 2) #<<
 ```
@@ -891,12 +921,11 @@ ggplot(
   )
 ) +
   geom_point() +
-  facet_grid(species ~ sex) +
-  scale_color_viridis_d() #<<
+  facet_grid(species ~ sex)
 ```
 ]
 .pull-right[
-```{r ref.label = "facet-color-legend", echo = FALSE, warning = FALSE, out.width = "100%"}
+```{r ref.label = "facet-color-legend", echo = FALSE, warning = FALSE, out.width = "95%"}
 ```
 ]
 
@@ -916,13 +945,12 @@ ggplot(
 ) +
   geom_point() +
   facet_grid(species ~ sex) +
-  scale_color_viridis_d() +
   guides(color = FALSE) #<<
 ```
 ]
 
 .pull-right[
-```{r ref.label = "facet-color-no-legend", echo = FALSE, warning = FALSE, out.width = "100%"}
+```{r ref.label = "facet-color-no-legend", echo = FALSE, warning = FALSE, out.width = "95%"}
 ```
 ]
 
@@ -948,28 +976,7 @@ ggplot(
 ]
 
 .pull-right[
-```{r ref.label = "hist1", echo = FALSE, warning = FALSE, out.width = "100%"}
-```
-]
-
----
-
-## Histograms - bin
-
-.pull-left[
-```{r hist2, fig.show = "hide", warning = FALSE}
-ggplot(
-  penguins, 
-  aes(
-    x = body_mass_g, 
-  )
-) +
-  geom_histogram(binwidth = 250)
-```
-]
-
-.pull-right[
-```{r ref.label = "hist2", echo = FALSE, warning = FALSE, out.width = "100%"}
+```{r ref.label = "hist1", echo = FALSE, warning = FALSE, out.width = "95%", message = FALSE}
 ```
 ]
 
@@ -990,9 +997,32 @@ ggplot(
 ]
 
 .pull-right[
-```{r ref.label = "hist3", echo = FALSE, warning = FALSE, out.width = "100%"}
+```{r ref.label = "hist3", echo = FALSE, warning = FALSE, out.width = "95%"}
 ```
 ]
+
+---
+
+## Histograms - binwidth
+
+.pull-left[
+```{r hist2, fig.show = "hide", warning = FALSE}
+ggplot(
+  penguins, 
+  aes(
+    x = body_mass_g, 
+  )
+) +
+  geom_histogram(binwidth = 250)
+```
+]
+
+.pull-right[
+```{r ref.label = "hist2", echo = FALSE, warning = FALSE, out.width = "95%"}
+```
+]
+
+
 
 ---
 
@@ -1012,7 +1042,7 @@ ggplot(
 ]
 
 .pull-right[
-```{r ref.label = "hist5", echo = FALSE, warning = FALSE, out.width = "100%"}
+```{r ref.label = "hist5", echo = FALSE, warning = FALSE, out.width = "95%"}
 ```
 ]
 
@@ -1034,9 +1064,36 @@ ggplot(
 ]
 
 .pull-right[
-```{r ref.label = "hist4", echo = FALSE, warning = FALSE, out.width = "100%"}
+```{r ref.label = "hist4", echo = FALSE, warning = FALSE, out.width = "95%"}
 ```
 ]
+
+---
+
+## Histograms - position
+
+.pull-left[
+```{r hist_pos, fig.show = "hide", warning = FALSE}
+ggplot(
+  penguins, 
+  aes(
+    x = body_mass_g, 
+    fill = species
+  )
+) +
+  geom_histogram(
+    bins = 20,
+    position = "identity",
+    alpha = 0.5
+  )
+```
+]
+
+.pull-right[
+```{r ref.label = "hist_pos", echo = FALSE, warning = FALSE, out.width = "95%"}
+```
+]
+
 
 ---
 
@@ -1051,14 +1108,14 @@ ggplot(
     fill = species
   )
 ) +
-  geom_histogram(bins = 15) +
+  geom_histogram(bins = 20) +
   facet_grid(species ~ .) + 
   guides(fill = FALSE)
 ```
 ]
 
 .pull-right[
-```{r ref.label = "hist6", echo = FALSE, warning = FALSE, out.width = "100%"}
+```{r ref.label = "hist6", echo = FALSE, warning = FALSE, out.width = "95%"}
 ```
 ]
 
@@ -1079,7 +1136,7 @@ ggplot(
 ]
 
 .pull-right[
-```{r ref.label = "dens1", echo = FALSE, warning = FALSE, out.width = "100%"}
+```{r ref.label = "dens1", echo = FALSE, warning = FALSE, out.width = "95%"}
 ```
 ]
 
@@ -1101,7 +1158,7 @@ ggplot(
 ]
 
 .pull-right[
-```{r ref.label = "dens3", echo = FALSE, warning = FALSE, out.width = "100%"}
+```{r ref.label = "dens3", echo = FALSE, warning = FALSE, out.width = "95%"}
 ```
 ]
 
@@ -1126,7 +1183,7 @@ ggplot(
 ]
 
 .pull-right[
-```{r ref.label = "dens2", echo = FALSE, warning = FALSE, out.width = "100%"}
+```{r ref.label = "dens2", echo = FALSE, warning = FALSE, out.width = "95%"}
 ```
 ]
 
@@ -1149,7 +1206,7 @@ ggplot(
 ]
 
 .pull-right[
-```{r ref.label = "violin", echo = FALSE, warning = FALSE, out.width = "100%"}
+```{r ref.label = "violin", echo = FALSE, warning = FALSE, out.width = "95%"}
 ```
 ]
 
@@ -1172,7 +1229,7 @@ ggplot(
 ]
 
 .pull-right[
-```{r ref.label = "ridge", echo = FALSE, warning = FALSE, message = FALSE, out.width = "100%"}
+```{r ref.label = "ridge", echo = FALSE, warning = FALSE, message = FALSE, out.width = "95%"}
 ```
 ]
 
@@ -1198,7 +1255,7 @@ penguins %>%
 ]
 
 .pull-right[
-```{r ref.label = "ridge2", echo = FALSE, warning = FALSE, message = FALSE, out.width = "100%"}
+```{r ref.label = "ridge2", echo = FALSE, warning = FALSE, message = FALSE, out.width = "95%"}
 ```
 ]
 
@@ -1220,7 +1277,7 @@ ggplot(
 ]
 
 .pull-right[
-```{r ref.label = "box1", echo = FALSE, warning = FALSE, out.width = "100%"}
+```{r ref.label = "box1", echo = FALSE, warning = FALSE, out.width = "95%"}
 ```
 ]
 
@@ -1243,7 +1300,7 @@ ggplot(
 ]
 
 .pull-right[
-```{r ref.label = "box2", echo = FALSE, warning = FALSE, out.width = "100%"}
+```{r ref.label = "box2", echo = FALSE, warning = FALSE, out.width = "95%"}
 ```
 ]
 
@@ -1265,7 +1322,7 @@ ggplot(
 ]
 
 .pull-right[
-```{r ref.label = "box3", echo = FALSE, warning = FALSE, out.width = "100%"}
+```{r ref.label = "box3", echo = FALSE, warning = FALSE, out.width = "95%"}
 ```
 ]
 
@@ -1288,13 +1345,39 @@ ggplot(
 ]
 
 .pull-right[
-```{r ref.label = "scatter1", echo = FALSE, warning = FALSE, out.width = "100%"}
+```{r ref.label = "scatter1", echo = FALSE, warning = FALSE, out.width = "95%"}
 ```
 ]
 
 ---
 
 ## Scatter plot - geom_smooth
+
+.pull-left[
+```{r scatter3, fig.show = "hide", warning = FALSE}
+ggplot(
+  penguins, 
+  aes(
+    x = bill_depth_mm, 
+    y = bill_length_mm, 
+    color = species
+  )
+) +
+  geom_point() +
+  geom_smooth(
+    fullrange = TRUE
+  )
+```
+]
+
+.pull-right[
+```{r ref.label = "scatter3", echo = FALSE, warning = FALSE, out.width = "95%", message=FALSE}
+```
+]
+
+---
+
+## Scatter plot - geom_smooth w/ lm
 
 .pull-left[
 ```{r scatter2, fig.show = "hide", warning = FALSE}
@@ -1316,36 +1399,11 @@ ggplot(
 ]
 
 .pull-right[
-```{r ref.label = "scatter2", echo = FALSE, warning = FALSE, out.width = "100%", message=FALSE}
+```{r ref.label = "scatter2", echo = FALSE, warning = FALSE, out.width = "95%", message=FALSE}
 ```
 ]
 
----
 
-## Scatter plot - geom_smooth
-
-.pull-left[
-```{r scatter3, fig.show = "hide", warning = FALSE}
-ggplot(
-  penguins, 
-  aes(
-    x = bill_depth_mm, 
-    y = bill_length_mm, 
-    color = species
-  )
-) +
-  geom_point() +
-  geom_smooth(
-    se = FALSE,
-    fullrange = TRUE
-  )
-```
-]
-
-.pull-right[
-```{r ref.label = "scatter3", echo = FALSE, warning = FALSE, out.width = "100%", message=FALSE}
-```
-]
 
 ---
 
@@ -1368,7 +1426,7 @@ penguins %>%
 ]
 
 .pull-right[
-```{r ref.label = "line", echo = FALSE, warning = FALSE, out.width = "100%", message=FALSE}
+```{r ref.label = "line", echo = FALSE, warning = FALSE, out.width = "95%", message=FALSE}
 ```
 ]
 
@@ -1394,7 +1452,7 @@ penguins %>%
 ]
 
 .pull-right[
-```{r ref.label = "line2", echo = FALSE, warning = FALSE, out.width = "100%", message=FALSE}
+```{r ref.label = "line2", echo = FALSE, warning = FALSE, out.width = "95%", message=FALSE}
 ```
 ]
 
@@ -1416,7 +1474,7 @@ ggplot(
 ]
 
 .pull-right[
-```{r ref.label = "bar1", echo = FALSE, warning = FALSE, out.width = "100%", message=FALSE}
+```{r ref.label = "bar1", echo = FALSE, warning = FALSE, out.width = "95%", message=FALSE}
 ```
 ]
 
@@ -1438,7 +1496,7 @@ ggplot(
 ]
 
 .pull-right[
-```{r ref.label = "bar2", echo = FALSE, warning = FALSE, out.width = "100%", message=FALSE}
+```{r ref.label = "bar2", echo = FALSE, warning = FALSE, out.width = "95%", message=FALSE}
 ```
 ]
 
@@ -1460,7 +1518,7 @@ ggplot(
 ]
 
 .pull-right[
-```{r ref.label = "bar3", echo = FALSE, warning = FALSE, out.width = "100%", message=FALSE}
+```{r ref.label = "bar3", echo = FALSE, warning = FALSE, out.width = "95%", message=FALSE}
 ```
 ]
 
@@ -1482,7 +1540,7 @@ ggplot(
 ]
 
 .pull-right[
-```{r ref.label = "bar4", echo = FALSE, warning = FALSE, out.width = "100%", message=FALSE}
+```{r ref.label = "bar4", echo = FALSE, warning = FALSE, out.width = "95%", message=FALSE}
 ```
 ]
 
@@ -1506,13 +1564,13 @@ penguins %>%
       fill = species
     ) 
   ) +
-    geom_density(alpha = 0.5, color = NA) +
-    facet_wrap(~sex, nrow = 2) + 
-    labs(
-      x = "Body Mass (g)",
-      y = "",
-      fill = "Species"
-    )
+  geom_density(alpha = 0.5, color = NA) +
+  facet_wrap(~sex, nrow = 2) + 
+  labs(
+    x = "Body Mass (g)",
+    y = "",
+    fill = "Species"
+  )
 ```
 
 
