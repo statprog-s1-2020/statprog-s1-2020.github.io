@@ -1,5 +1,5 @@
 ---
-title: "Lec 10 - ggplot2 ecosystem & designing visualization"
+title: "Lec 10 - ggplot2 ecosystem & designing visualizations"
 subtitle: "<br/> Statistical Programming"
 author: "Sem 1, 2020"
 date: "<br/> Dr. Colin Rundel"
