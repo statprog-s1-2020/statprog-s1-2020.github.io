@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="" xml:lang="">
   <head>
-    <title>Lec 09 - Visualization with ggplot2</title>
+    <title>Lec 10 - ggplot2 ecosystem &amp; designing visualization</title>
     <meta charset="utf-8" />
     <meta name="author" content="Sem 1, 2020" />
     <script src="libs/header-attrs/header-attrs.js"></script>
@@ -12,7 +12,7 @@
     <textarea id="source">
 class: center, middle, inverse, title-slide
 
-# Lec 09 - Visualization with ggplot2
+# Lec 10 - ggplot2 ecosystem &amp; designing visualization
 ## <br/> Statistical Programming
 ### Sem 1, 2020
 ### <br/> Dr. Colin Rundel
@@ -23,6 +23,312 @@ exclude: true
 
 
 
+---
+class: middle
+
+# The ggplot2 ecosystem
+
+---
+class: middle
+
+# ggthemes
+
+
+---
+
+## ggplot2 themes
+
+
+```r
+g = ggplot(palmerpenguins::penguins, aes(x=species, y=body_mass_g, fill=species)) + geom_boxplot()
+```
+
+.pull-left[
+
+```r
+g
+```
+
+&lt;img src="Lec10_files/figure-html/theme2-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+
+
+```r
+g + theme_dark()
+```
+
+&lt;img src="Lec10_files/figure-html/theme3-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+
+```r
+g + theme_minimal()
+```
+
+&lt;img src="Lec10_files/figure-html/theme4-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+
+
+```r
+g + theme_void()
+```
+
+&lt;img src="Lec10_files/figure-html/theme5-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+## ggthemes
+
+.pull-left[
+
+```r
+g + ggthemes::theme_economist() + 
+  ggthemes::scale_fill_economist()
+```
+
+&lt;img src="Lec10_files/figure-html/theme6-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+
+
+```r
+g + ggthemes::theme_fivethirtyeight() + 
+  ggthemes::scale_fill_fivethirtyeight()
+```
+
+&lt;img src="Lec10_files/figure-html/theme7-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+
+```r
+g + ggthemes::theme_gdocs() +
+  ggthemes::scale_fill_gdocs()
+```
+
+&lt;img src="Lec10_files/figure-html/theme8-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+
+
+```r
+g + ggthemes::theme_wsj() +
+  ggthemes::scale_fill_wsj()
+```
+
+&lt;img src="Lec10_files/figure-html/theme9-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+]
+
+
+---
+
+## And for those who miss Excel
+
+.pull-left[
+
+```r
+g + ggthemes::theme_excel() +
+  ggthemes::scale_fill_excel()
+```
+
+&lt;img src="Lec10_files/figure-html/theme10-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+
+```r
+g + ggthemes::theme_excel_new() +
+  ggthemes::scale_fill_excel_new()
+```
+
+&lt;img src="Lec10_files/figure-html/theme11-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+class: middle
+
+# GGally
+
+---
+
+
+```r
+GGally::ggpairs(palmerpenguins::penguins)
+```
+
+&lt;img src="Lec10_files/figure-html/ggally-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+
+---
+class: middle
+
+&lt;img src="imgs/hex-ggrepel.png" width="45%" style="display: block; margin: auto;" /&gt;
+
+---
+
+
+```r
+d = tibble(
+  car = rownames(mtcars),
+  weight = mtcars$wt,
+  mpg = mtcars$mpg
+) %&gt;%
+  filter(weight &gt; 2.75, weight &lt; 3.45)
+```
+
+--
+
+.pull-left[
+
+```r
+ggplot(d, aes(x=weight, y=mpg)) +
+  geom_point(color="red") +
+* geom_text(
+*   aes(label = car)
+* )
+```
+
+&lt;img src="Lec10_files/figure-html/ggrepel2-1.png" width="65%" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+
+```r
+ggplot(d, aes(x=weight, y=mpg)) +
+  geom_point(color="red") +
+* ggrepel::geom_text_repel(
+*   aes(label = car)
+* )
+```
+
+&lt;img src="Lec10_files/figure-html/ggrepel3-1.png" width="65%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+
+```r
+ggplot(d, aes(x=weight, y=mpg)) +
+  geom_point(color="red") +
+  ggrepel::geom_text_repel(
+    aes(label = car),
+*   nudge_x = .1, box.padding = 1, point.padding = 0.6,
+*   arrow = arrow(length = unit(0.02, "npc")), segment.alpha = 0.25
+  )
+```
+
+&lt;img src="Lec10_files/figure-html/ggrepel5-1.png" width="65%" style="display: block; margin: auto;" /&gt;
+
+---
+class: middle
+
+&lt;img src="imgs/patchwork_logo.png" width="45%" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Plot objects
+
+
+```r
+library(patchwork)
+
+p1 = ggplot(diamonds) + geom_point(aes(x = carat, y = price))
+
+p2 = ggplot(diamonds) + geom_boxplot(aes(x = cut, y = price))
+
+p3 = ggplot(diamonds) + geom_boxplot(aes(x = color, y = price))
+
+p4 = ggplot(diamonds) + geom_boxplot(aes(x = clarity, y = price))
+```
+
+---
+
+
+```r
+p1 + p2 + p3 + p4
+```
+
+&lt;img src="Lec10_files/figure-html/pw_plot1-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+---
+
+
+```r
+p1 + p2 + p3 + p4 + plot_layout(nrow=1)
+```
+
+&lt;img src="Lec10_files/figure-html/pw_plot2-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+---
+
+
+```r
+p1 / (p2 + p3 + p4)
+```
+
+&lt;img src="Lec10_files/figure-html/pw_plot3-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+---
+
+
+```r
+p1 + {
+  p2 + {
+    p3 + p4 + plot_layout(ncol = 1)
+  }
+} + plot_layout(ncol = 1)
+```
+
+&lt;img src="Lec10_files/figure-html/pw_plot4-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+---
+
+
+```r
+p1 + p2 + p3 + p4 + plot_annotation(title = "Diamonds data", tag_levels = c("A","1"))
+```
+
+&lt;img src="Lec10_files/figure-html/pw_plot5-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+---
+class: middle
+
+&lt;img src="imgs/hex-gganimate.png" width="45%" style="display: block; margin: auto;" /&gt;
+
+---
+
+.pull-left[
+
+```r
+airq = airquality
+airq$Month = month.name[airq$Month]
+
+ggplot(
+  airq, 
+  aes(Day, Temp, group = Month)
+) + 
+  geom_line() + 
+  geom_segment(
+    aes(xend = 31, yend = Temp), 
+    linetype = 2, 
+    colour = 'grey'
+  ) + 
+  geom_point(size = 2) + 
+  geom_text(
+    aes(x = 31.1, label = Month), 
+    hjust = 0
+  ) + 
+* gganimate::transition_reveal(Day) +
+  coord_cartesian(clip = 'off') + 
+  labs(
+    title = 'Temperature in New York', 
+    y = 'Temperature (°F)'
+  ) + 
+  theme_minimal() + 
+  theme(plot.margin = margin(5.5, 40, 5.5, 5.5))
+```
+]
+
+.pull-right[
+&lt;img src="imgs/gganim_weather.gif" style="display: block; margin: auto;" /&gt;
+]
+
+.footnote[https://github.com/thomasp85/gganimate]
 ---
 class: center, middle
 
@@ -86,18 +392,18 @@ datasets::anscombe %&gt;% as_tibble()
 ```
 ]
 
---
+---
 
 .midi[
 
 ```r
 tidy_anscombe %&gt;%
   group_by(group) %&gt;%
-  summarize(mean_x = mean(x), mean_y = mean(y), sd_x = sd(x), sd_y = sd(y), cor = cor(x,y))
-```
-
-```
-## `summarise()` ungrouping output (override with `.groups` argument)
+  summarize(
+    mean_x = mean(x), mean_y = mean(y), 
+    sd_x = sd(x), sd_y = sd(y),
+    cor = cor(x,y), .groups = "drop"
+  )
 ```
 
 ```
@@ -117,22 +423,62 @@ tidy_anscombe %&gt;%
 ```r
 ggplot(tidy_anscombe, aes(x = x, y = y, color = as.factor(group))) +
   geom_point(size=2) +
-  facet_wrap(vars(group)) +
-  geom_smooth(method="lm", se=FALSE, fullrange=TRUE) +
+  facet_wrap(~group) +
+  geom_smooth(method="lm", se=FALSE, fullrange=TRUE, formula = y~x) +
   guides(color=FALSE)
 ```
 
-```
-## `geom_smooth()` using formula 'y ~ x'
-```
-
-![](Lec10_files/figure-html/unnamed-chunk-4-1.png)&lt;!-- --&gt;
+&lt;img src="Lec10_files/figure-html/unnamed-chunk-9-1.png" width="45%" style="display: block; margin: auto;" /&gt;
 
 ---
 
 ## DatasauRus
 
-.pull-left33[
+
+
+.pull-left-narrow[
+
+```r
+library(datasauRus)
+```
+
+```
+## 
+## Attaching package: 'datasauRus'
+```
+
+```
+## The following object is masked _by_ '.GlobalEnv':
+## 
+##     datasaurus_dozen
+```
+
+```r
+ggplot(
+  datasaurus_dozen, 
+  aes(
+    x = x, y = y, 
+    color = dataset
+  )
+) +
+  geom_point() +
+  facet_wrap(~dataset) +
+  guides(color=FALSE)
+```
+]
+
+.pull-right-wide[
+&lt;img src="Lec10_files/figure-html/unnamed-chunk-11-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+class: middle
+
+&lt;img src="Lec10_files/figure-html/unnamed-chunk-12-1.png" width="1800" style="display: block; margin: auto;" /&gt;
+
+---
+
+.pull-left-narrow[
 
 ```r
 datasauRus::datasaurus_dozen
@@ -158,22 +504,18 @@ datasauRus::datasaurus_dozen
 
 --
 
-.pull-right66[
+.pull-right-wide[
 
 ```r
-datasauRus::datasaurus_dozen %&gt;%
+datasaurus_dozen %&gt;%
   group_by(dataset) %&gt;%
   summarize(mean_x = mean(x), mean_y = mean(y), 
             sd_x = sd(x), sd_y = sd(y), 
-            cor = cor(x,y))
+            cor = cor(x,y), .groups = "drop")
 ```
 
 ```
-## `summarise()` ungrouping output (override with `.groups` argument)
-```
-
-```
-## # A tibble: 13 x 6
+## # A tibble: 12 x 6
 ##    dataset    mean_x mean_y  sd_x  sd_y     cor
 ##    &lt;chr&gt;       &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;
 ##  1 away         54.3   47.8  16.8  26.9 -0.0641
@@ -188,7 +530,6 @@ datasauRus::datasaurus_dozen %&gt;%
 ## 10 star         54.3   47.8  16.8  26.9 -0.0630
 ## 11 v_lines      54.3   47.8  16.8  26.9 -0.0694
 ## 12 wide_lines   54.3   47.8  16.8  26.9 -0.0666
-## 13 x_shape      54.3   47.8  16.8  26.9 -0.0656
 ```
 ]
 
@@ -198,11 +539,11 @@ datasauRus::datasaurus_dozen %&gt;%
 ```r
 ggplot(datasauRus::datasaurus_dozen, aes(x = x, y = y, color = dataset)) +
   geom_point() +
-  facet_wrap(vars(dataset)) +
+  facet_wrap(~dataset) +
   guides(color=FALSE)
 ```
 
-![](Lec10_files/figure-html/unnamed-chunk-7-1.png)&lt;!-- --&gt;
+&lt;img src="Lec10_files/figure-html/unnamed-chunk-15-1.png" width="45%" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -211,24 +552,13 @@ ggplot(datasauRus::datasaurus_dozen, aes(x = x, y = y, color = dataset)) +
 
 
 .pull-left[
-
-```
-## `geom_smooth()` using formula 'y ~ x'
-```
-
-![](Lec10_files/figure-html/unnamed-chunk-9-1.png)&lt;!-- --&gt;
+&lt;img src="Lec10_files/figure-html/unnamed-chunk-17-1.png" width="1050" style="display: block; margin: auto;" /&gt;
 ]
 
 --
 
 .pull-right[
-
-```
-## `geom_smooth()` using formula 'y ~ x'
-## `geom_smooth()` using formula 'y ~ x'
-```
-
-![](Lec10_files/figure-html/unnamed-chunk-10-1.png)&lt;!-- --&gt;
+&lt;img src="Lec10_files/figure-html/unnamed-chunk-18-1.png" width="1050" style="display: block; margin: auto;" /&gt;
 ]
 
 
@@ -241,35 +571,43 @@ class: center, middle
 
 ## Keep it simple
 
-&lt;br/&gt; &lt;br/&gt; &lt;br/&gt;
+.pull-left[ 
 
-.pull-left[
-&lt;img src="imgs/pie-3d.jpg" width="300" /&gt;
+&lt;img src="imgs/pie-3d.jpg" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
 .pull-right[
-&lt;img src="Lec10_files/figure-html/pie-to-bar-1.png" width="500" /&gt;
+&lt;img src="Lec10_files/figure-html/pie-to-bar-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
 
 ## Use color	to	draw	attention
 
-&lt;br/&gt; &lt;br/&gt;
-
 .pull-left[
-&lt;img src="Lec10_files/figure-html/unnamed-chunk-11-1.png" width="500" /&gt;
+&lt;img src="Lec10_files/figure-html/unnamed-chunk-19-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
 .pull-right[
-&lt;img src="Lec10_files/figure-html/unnamed-chunk-12-1.png" width="600" /&gt;
+&lt;img src="Lec10_files/figure-html/unnamed-chunk-20-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
 
 ## Tell a story
 
-&lt;img src="imgs/time-series.story.png" width="800" style="display: block; margin: auto;" /&gt;
+&lt;br/&gt;
+
+.pull-left[
+&lt;img src="imgs/time-series-story-1.png" width="98%" style="display: block; margin: auto;" /&gt;
+]
+
+--
+
+.pull-right[
+&lt;img src="imgs/time-series-story-2.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
 
 .footnote[
 *Credit*: Angela Zoss and Eric Monson, Duke DVS
@@ -282,11 +620,13 @@ class: center, middle
 &lt;br/&gt; &lt;br/&gt;
 
 .pull-left[
-&lt;img src="imgs/vis_inj1.png" width="500" style="display: block; margin: auto;" /&gt;
+&lt;img src="imgs/vis_inj1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
+--
+
 .pull-right[
-&lt;img src="imgs/vis_inj2.png" width="500" style="display: block; margin: auto;" /&gt;
+&lt;img src="imgs/vis_inj2.png" width="96%" style="display: block; margin: auto;" /&gt;
 ]
 
 
@@ -296,17 +636,15 @@ class: center, middle
 
 ---
 
-## Order / usage matters
-
-&lt;br/&gt; &lt;br/&gt;
+## Ordering matter
 
 .pull-left[
-&lt;img src="imgs/vis_order1.png" width="350" style="display: block; margin: auto;" /&gt;
+&lt;img src="imgs/vis_order1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ]
 
 
 .pull-right[
-&lt;img src="imgs/vis_order2.png" width="350" style="display: block; margin: auto;" /&gt;
+&lt;img src="imgs/vis_order2.png" width="80%" style="display: block; margin: auto;" /&gt;
 ]
 
 
@@ -316,38 +654,40 @@ class: center, middle
 
 ---
 
-## Be clear about missing data
+## Clearly indicate missing data
 
-&lt;br/&gt;&lt;br/&gt;
+&lt;br/&gt;
 
 &lt;img src="imgs/vis_missing.png" width="100%" style="display: block; margin: auto;" /&gt;
 
 .footnote[
-http://ivi.sagepub.com/content/10/4/271 &lt;br/&gt;
-Angela Zoss and Eric Monson, Duke DVS
+http://ivi.sagepub.com/content/10/4/271, Angela Zoss and Eric Monson, Duke DVS
 ]
 
 
 ---
 
-## Reduce cognitive burden
+## Reduce cognitive load
 
-&lt;br/&gt; &lt;br/&gt;
 
 &lt;img src="imgs/vis_text.png" width="100%" style="display: block; margin: auto;" /&gt;
 
 .footnote[
-http://www.storytellingwithdata.com/2012/09/some-finer-points-of-data-visualization.html &lt;br/&gt;
-Angela Zoss and Eric Monson, Duke DVS
+http://www.storytellingwithdata.com/2012/09/some-finer-points-of-data-visualization.html
 ]
 
 ---
 
 ## Use descriptive titles
 
-&lt;br/&gt; &lt;br/&gt;
+.pull-left[
+&lt;img src="imgs/vis-title-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+]
 
-&lt;img src="imgs/vis_title.png" width="100%" style="display: block; margin: auto;" /&gt;
+.pull-right[
+&lt;img src="imgs/vis-title-2.png" width="80%" style="display: block; margin: auto;" /&gt;
+]
+
 
 
 .footnote[
@@ -358,9 +698,7 @@ Angela Zoss and Eric Monson, Duke DVS
 
 ## Annotate figures directly
 
-&lt;br/&gt; &lt;br/&gt;
-
-&lt;img src="imgs/vis_annotate.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="imgs/vis_annotate.png" width="80%" style="display: block; margin: auto;" /&gt;
 
 
 .footnote[
@@ -371,9 +709,7 @@ https://bl.ocks.org/susielu/23dc3082669ee026c552b85081d90976
 
 ## All of the data doesn't tell a story
 
-&lt;br/&gt;
-
-&lt;img src="imgs/vis_nyt1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="imgs/vis_nyt1.png" width="60%" style="display: block; margin: auto;" /&gt;
 
 
 .footnote[
@@ -384,9 +720,8 @@ http://www.nytimes.com/interactive/2014/06/05/upshot/how-the-recession-reshaped-
 
 ## All of the data doesn't tell a story
 
-&lt;br/&gt;
 
-&lt;img src="imgs/vis_nyt2.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="imgs/vis_nyt2.png" width="60%" style="display: block; margin: auto;" /&gt;
 
 
 .footnote[
@@ -397,9 +732,7 @@ http://www.nytimes.com/interactive/2014/06/05/upshot/how-the-recession-reshaped-
 
 ## All of the data doesn't tell a story
 
-&lt;br/&gt;
-
-&lt;img src="imgs/vis_nyt3.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="imgs/vis_nyt3.png" width="60%" style="display: block; margin: auto;" /&gt;
 
 
 .footnote[
@@ -416,7 +749,7 @@ class: middle, center
 ## The Why Axis - BLS
 
 
-&lt;img src="imgs/vis_bls.gif" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="imgs/vis_bls.gif" width="60%" style="display: block; margin: auto;" /&gt;
 
 .footnote[
 http://thewhyaxis.info/defaults/
@@ -426,18 +759,12 @@ http://thewhyaxis.info/defaults/
 
 ## The Why Axis - Gender Gap
 
-&lt;br/&gt;
 
-&lt;img src="imgs/vis_gap.jpg" width="60%" style="display: block; margin: auto;" /&gt;
+&lt;img src="imgs/vis_gap.jpg" width="45%" style="display: block; margin: auto;" /&gt;
 
 .footnote[
 http://thewhyaxis.info/gap-remake/
 ]
-
----
-class: middle, center
-
-# Acknowledgments
 
 ---
 
